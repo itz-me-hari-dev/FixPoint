@@ -9,4 +9,8 @@ urlpatterns = [
     path('edit_service_category_page/<int:category_id>/',views.edit_service_category_page,name="edit_service_category_page"),
     path('update_service_category/<int:category_id>/',views.update_service_category,name="update_service_category"),
     path('delete_service_category/<int:category_id>/',views.delete_service_category,name="delete_service_category"),
+
+
+
+    path('admin_login/',views.admin_login,name="admin_login"),
 ]

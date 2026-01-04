@@ -8,7 +8,7 @@ from AdminApp.models import *
 def dashboard(request):
     return render(request,"dashboard.html")
 
-# Category Views
+# Category-View-Start
 
 def add_service_category_form_page(request):
     return render(request,"add-service-category-page.html")
@@ -59,3 +59,12 @@ def delete_service_category(request,category_id):
     ServiceCategoryDb.objects.filter(id=category_id).delete()
     return redirect(display_service_categories_page)
 
+
+# Category-View-Ends
+
+# Admin-View-Start
+
+def admin_login(request):
+    return render(request,"admin-login.html")
+
+# Admin-View-End

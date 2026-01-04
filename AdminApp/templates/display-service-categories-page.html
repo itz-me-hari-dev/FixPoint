@@ -46,10 +46,6 @@
                                             class="btn btn-sm btn-outline-info mr-1" style="max-width: 90px;">
                                             Edit
                                         </a>
-                                        <!-- Enable / Disable -->
-                                        <a href="#" class="btn btn-sm btn-outline-dark mr-1" style="max-width: 90px;">
-                                            {% if category.is_active %}Disable{% else %}Enable{% endif %}
-                                        </a>
                                         <!-- Delete (Modal trigger) -->
                                         <a href="{% url 'delete_service_category' category_id=category.id %}"
                                             class="btn btn-sm btn-outline-danger" style="max-width: 90px;"
