@@ -1,0 +1,60 @@
+{% extends 'base.html' %}
+{% load static %}
+{% block title %}FixPoint - Service Category Form{% endblock %}
+
+{% block content %}
+
+<div class="content-wrapper">
+
+  <div class="row">
+    <div class="col-12">
+      <h3 class="mb-4 font-weight-bold">Service Categories Form</h3>
+    </div>
+  </div>
+
+  <div class="row">
+    <div class="col-lg-12 grid-margin">
+      <div class="card">
+        <div class="card-body">
+
+          <form class="forms-sample" method="post" action="{% url 'save_service_category' %}">
+            {% csrf_token %}
+
+            <div class="form-group">
+              <label class="font-weight-bold">Category Name</label>
+              <input type="text" class="form-control" name="category_name" placeholder="Plumber, Electrician, Painter"
+                required>
+            </div>
+
+            <div class="form-group">
+              <label class="font-weight-bold">Category Description</label>
+              <textarea class="form-control" name="category_description" rows="3"
+                placeholder="Short description about the service"></textarea>
+            </div>
+
+            <div class="form-group">
+              <div class="custom-control custom-checkbox">
+                <input type="checkbox" class="custom-control-input" id="isActive" name="is_active" checked>
+                <label class="custom-control-label font-weight-bold" for="isActive">
+                  Activate Category
+                </label>
+              </div>
+            </div>
+
+            <button type="submit" class="btn btn-gradient-primary mr-2">
+              Save
+            </button>
+            <button type="reset" class="btn btn-light">
+              Cancel
+            </button>
+
+          </form>
+
+        </div>
+      </div>
+    </div>
+  </div>
+
+</div>
+
+{% endblock %}
