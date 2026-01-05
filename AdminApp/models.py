@@ -10,15 +10,15 @@ class ServiceCategoryDb(models.Model):
 
 class UserDb(models.Model):
 
-    # ROLE_CHOICES = (
-    #     ('SERVICE_PROVIDER', 'Service Provider'),
-    #     ('CUSTOMER', 'Customer'),
-    # )
+    ROLE_CHOICES = (
+        ('SERVICE_PROVIDER', 'Service Provider'),
+        ('CUSTOMER', 'Customer'),
+    )
 
     username = models.CharField(max_length=100, unique=True)
     email = models.EmailField(unique=True)
     password = models.CharField(max_length=255)
-    role = models.CharField(max_length=20)
+    role = models.CharField(max_length=20,choices=ROLE_CHOICES)
     is_approved = models.BooleanField(default=False)
 
 
@@ -28,6 +28,8 @@ class CustomerProfileDb(models.Model):
     phone_number = models.CharField(max_length=15)
     address = models.TextField()
     location = models.CharField(max_length=150)
+    latitude = models.DecimalField(max_digits=9, decimal_places=6)
+    longitude = models.DecimalField(max_digits=9, decimal_places=6)
 
 class ServiceProviderProfileDb(models.Model):
 
@@ -37,5 +39,7 @@ class ServiceProviderProfileDb(models.Model):
     experience = models.PositiveIntegerField(help_text="Experience in years")
     hourly_rate = models.DecimalField(max_digits=8, decimal_places=2)
     location = models.CharField(max_length=150)
+    latitude = models.DecimalField(max_digits=9, decimal_places=6)
+    longitude = models.DecimalField(max_digits=9, decimal_places=6)
     is_available = models.BooleanField(default=True)
     is_approved = models.BooleanField(default=False)
