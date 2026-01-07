@@ -17,12 +17,14 @@ Including another URLconf
 from django.contrib import admin
 from django.urls import path , include
 import AdminApp.urls
+import UserApp.urls
 from django.contrib.staticfiles.urls import staticfiles_urlpatterns , static
 from FixPoint import settings
 
 urlpatterns = [
     path('admin/', admin.site.urls),
-    path('AdminApp/',include(AdminApp.urls))
+    path('FixPointAdmin/',include(AdminApp.urls)),
+    path('FixPoint/', include(UserApp.urls)),
 ]
 
 urlpatterns += staticfiles_urlpatterns()
