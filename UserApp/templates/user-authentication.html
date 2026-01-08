@@ -1,0 +1,199 @@
+<!DOCTYPE html>
+{% load static %}
+<html lang="en">
+
+<head>
+    <meta charset="utf-8">
+    <title>FixPoint | Welcome</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+
+    <link href="{% static 'user_app_assets/css/bootstrap.min.css' %}" rel="stylesheet">
+    <link href="{% static 'user_app_assets/css/style.css' %}" rel="stylesheet">
+
+    <style>
+        body {
+            min-height: 100vh;
+            margin: 0;
+            font-family: 'Poppins', sans-serif;
+            background: radial-gradient(circle at top left, #eef3ff, #f7f9fc);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            animation: breatheBg 20s ease-in-out infinite;
+        }
+
+        @keyframes breatheBg {
+
+            0%,
+            100% {
+                background-position: 0% 50%;
+            }
+
+            50% {
+                background-position: 100% 50%;
+            }
+        }
+
+        .auth-glass {
+            width: 420px;
+            padding: 45px;
+            border-radius: 22px;
+            background: rgba(255, 255, 255, 0.65);
+            backdrop-filter: blur(18px);
+            box-shadow: 0 40px 80px rgba(0, 0, 0, .08);
+            animation: floatIn 1.2s cubic-bezier(.16, .84, .44, 1);
+        }
+
+        @keyframes floatIn {
+            from {
+                opacity: 0;
+                transform: translateY(16px) scale(.98);
+            }
+
+            to {
+                opacity: 1;
+                transform: translateY(0) scale(1);
+            }
+        }
+
+        .auth-switch {
+            text-align: center;
+            margin-bottom: 28px;
+        }
+
+        .auth-switch span {
+            margin: 0 18px;
+            font-weight: 600;
+            cursor: pointer;
+            color: #aaa;
+            transition: color .4s ease;
+        }
+
+        .auth-switch .active {
+            color: var(--bs-primary);
+        }
+
+        .forms {
+            position: relative;
+            height: 300px;
+        }
+
+        .auth-form {
+            position: absolute;
+            width: 100%;
+            opacity: 0;
+            transform: translateY(8px);
+            pointer-events: none;
+            transition:
+                opacity .45s ease,
+                transform .45s cubic-bezier(.16, .84, .44, 1);
+        }
+
+        .auth-form.active {
+            opacity: 1;
+            transform: translateY(0);
+            pointer-events: auto;
+        }
+
+        .form-control,
+        .form-select {
+            border-radius: 14px;
+            padding: 12px 14px;
+            background: rgba(255, 255, 255, 0.85);
+            border: 1px solid rgba(0, 0, 0, 0.08);
+            transition:
+                box-shadow .35s ease,
+                transform .35s ease;
+        }
+
+        .form-control:focus,
+        .form-select:focus {
+            box-shadow: 0 0 0 6px rgba(13, 110, 253, .12);
+            transform: translateY(-1px);
+        }
+
+        .btn {
+            border-radius: 14px;
+            padding: 12px;
+            font-weight: 600;
+            transition: transform .3s ease;
+        }
+
+        .btn:hover {
+            transform: translateY(-1px);
+        }
+    </style>
+</head>
+
+<body>
+
+    <div class="auth-glass">
+
+        <!-- Switch -->
+        <div class="auth-switch">
+            <span id="loginTab" class="active" onclick="showLogin()">Sign In</span>
+            <span id="registerTab" onclick="showRegister()">Sign Up</span>
+        </div>
+
+        <div class="forms">
+            <!-- SIGN IN -->
+            <form id="loginForm" class="auth-form active" method="post">
+                {% csrf_token %}
+                <div class="mb-3">
+                    <input type="email" class="form-control" placeholder="Email or Username" name="email-or-username" required>
+                </div>
+                <div class="mb-4">
+                    <input type="password" class="form-control" placeholder="Password" required>
+                </div>
+                <button class="btn btn-primary w-100">Continue</button>
+            </form>
+
+            <!-- SIGN UP -->
+            <form id="registerForm" class="auth-form" method="post">
+                {% csrf_token %}
+                <div class="mb-3">
+                    <input type="text" class="form-control" placeholder="Username" required>
+                </div>
+                <div class="mb-3">
+                    <input type="email" class="form-control" placeholder="Email" required>
+                </div>
+                <div class="mb-3">
+                    <input type="password" class="form-control" placeholder="Password" required>
+                </div>
+                <div class="mb-4">
+                    <select class="form-select" required>
+                        <option value="">Register As</option>
+                        <option value="CUSTOMER">Customer</option>
+                        <option value="SERVICE_PROVIDER">Service Provider</option>
+                    </select>
+                </div>
+                <button class="btn btn-primary w-100">Create Account</button>
+            </form>
+        </div>
+
+    </div>
+
+    <script>
+        const loginTab = document.getElementById("loginTab");
+        const registerTab = document.getElementById("registerTab");
+        const loginForm = document.getElementById("loginForm");
+        const registerForm = document.getElementById("registerForm");
+
+        function showRegister() {
+            loginForm.classList.remove("active");
+            registerForm.classList.add("active");
+            loginTab.classList.remove("active");
+            registerTab.classList.add("active");
+        }
+
+        function showLogin() {
+            registerForm.classList.remove("active");
+            loginForm.classList.add("active");
+            registerTab.classList.remove("active");
+            loginTab.classList.add("active");
+        }
+    </script>
+
+</body>
+
+</html>
