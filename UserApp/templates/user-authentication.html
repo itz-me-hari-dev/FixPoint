@@ -140,10 +140,10 @@
             <form id="loginForm" class="auth-form active" method="post">
                 {% csrf_token %}
                 <div class="mb-3">
-                    <input type="email" class="form-control" placeholder="Email or Username" name="email-or-username" required>
+                    <input type="email" class="form-control" placeholder="Email or Username" name="email_or_username" required>
                 </div>
                 <div class="mb-4">
-                    <input type="password" class="form-control" placeholder="Password" required>
+                    <input type="password" class="form-control" placeholder="Password" name="password" required>
                 </div>
                 <button class="btn btn-primary w-100">Continue</button>
             </form>
@@ -152,16 +152,16 @@
             <form id="registerForm" class="auth-form" method="post">
                 {% csrf_token %}
                 <div class="mb-3">
-                    <input type="text" class="form-control" placeholder="Username" required>
+                    <input type="text" class="form-control" placeholder="Username" name="username" required>
                 </div>
                 <div class="mb-3">
-                    <input type="email" class="form-control" placeholder="Email" required>
+                    <input type="email" class="form-control" placeholder="Email" name="email" required>
                 </div>
                 <div class="mb-3">
-                    <input type="password" class="form-control" placeholder="Password" required>
+                    <input type="password" class="form-control" placeholder="Password" name="password" required>
                 </div>
                 <div class="mb-4">
-                    <select class="form-select" required>
+                    <select class="form-select" name="user_role" required>
                         <option value="">Register As</option>
                         <option value="CUSTOMER">Customer</option>
                         <option value="SERVICE_PROVIDER">Service Provider</option>
