@@ -11,6 +11,7 @@
     <link href="{% static 'user_app_assets/css/style.css' %}" rel="stylesheet">
 
     <style>
+
         body {
             min-height: 100vh;
             margin: 0;
@@ -75,7 +76,7 @@
 
         .forms {
             position: relative;
-            height: 300px;
+            height: 360px;
         }
 
         .auth-form {
@@ -149,7 +150,7 @@
             </form>
 
             <!-- SIGN UP -->
-            <form id="registerForm" class="auth-form" method="post">
+            <form id="registerForm" class="auth-form" method="post" action="{% url 'user_sign_up' %}">
                 {% csrf_token %}
                 <div class="mb-3">
                     <input type="text" class="form-control" placeholder="Username" name="username" required>
@@ -159,6 +160,9 @@
                 </div>
                 <div class="mb-3">
                     <input type="password" class="form-control" placeholder="Password" name="password" required>
+                </div>
+                <div class="mb-3">
+                    <input type="password" class="form-control" placeholder="Confirm Password" name="confirm_password" required>
                 </div>
                 <div class="mb-4">
                     <select class="form-select" name="user_role" required>

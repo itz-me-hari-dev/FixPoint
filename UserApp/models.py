@@ -12,5 +12,6 @@ class UserDb(models.Model):
     username = models.CharField(max_length=100, unique=True)
     email = models.EmailField(unique=True)
     password = models.CharField(max_length=255)
-    role = models.CharField(max_length=20,choices=ROLE_CHOICES)
+    password_confirm = models.CharField(max_length=255)
+    user_role = models.CharField(max_length=20,choices=ROLE_CHOICES)
     is_approved = models.BooleanField(default=False)
