@@ -94,12 +94,12 @@
                             </div>
                         </div> -->
                         <a href="#" class="nav-item nav-link">Contact</a>
-                        {% if request.session.UserName %}
+                        {% if request.session.username %}
                         <div class="nav-item dropdown">
-                            <a href="#" class="nav-link dropdown-toggle" data-bs-toggle="dropdown">Profile</a>
+                            <a href="#" class="nav-link dropdown-toggle" data-bs-toggle="dropdown">{{ request.session.username }}</a>
                             <div class="dropdown-menu bg-light rounded-0 rounded-bottom m-0">
                                 <a href="#" class="dropdown-item">Dashboard</a>
-                                <a href="#" class="dropdown-item">Logout</a>
+                                <a href="{% url 'user_logout' %}" class="dropdown-item">Logout</a>
                             </div>
                         </div>
                         {% else %}
