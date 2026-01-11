@@ -17,7 +17,8 @@
       <div class="card">
         <div class="card-body">
 
-          <form class="forms-sample" method="post" action="{% url 'update_service_category' category_id=category.id %}">
+          <form class="forms-sample" method="post" action="{% url 'update_service_category' category_id=category.id %}"
+          enctype="multipart/form-data" >
             {% csrf_token %}
 
             <div class="form-group">
@@ -64,8 +65,8 @@
 
             <div class="form-group">
               <div class="custom-control custom-checkbox">
-                <input type="checkbox" class="custom-control-input" id="isActive" name="is_active" {% if
-                  category.is_active %}checked{% endif %}>
+                <input type="checkbox" class="custom-control-input" id="isActive" name="is_active"
+                {% if category.is_active %}checked{% endif %}>
                 <label class="custom-control-label font-weight-bold" for="isActive">
                   Activate Category
                 </label>

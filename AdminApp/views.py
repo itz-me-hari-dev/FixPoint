@@ -18,11 +18,13 @@ def save_service_category(request):
     if request.method == 'POST':
         category_name = request.POST.get("category_name")
         category_description = request.POST.get("category_description")
+        category_image = request.FILES.get("category_image")
         is_active = bool(request.POST.get('is_active'))
 
         ServiceCategoryDb(
             category_name = category_name,
             category_description = category_description,
+            category_image = category_image,
             is_active = is_active
 
         ).save()
@@ -45,14 +47,26 @@ def update_service_category(request,category_id):
         category_description = request.POST.get("category_description")
         is_active = bool(request.POST.get('is_active'))
 
+        try :
+            category_image = request.FILES["category_image"]
+            fs = FileSystemStorage()
+            file = fs.save(f'category_image/{category_image.name}',category_image)
+
+        except MultiValueDictKeyError :
+
+            file = ServiceCategoryDb.objects.get(id=category_id).category_image
+
         ServiceCategoryDb.objects.filter(id=category_id).update(
             category_name = category_name,
             category_description = category_description,
+            category_image = file,
             is_active = is_active
 
         )
 
         return redirect(display_service_categories_page)
+
+
 
 
 def delete_service_category(request,category_id):
