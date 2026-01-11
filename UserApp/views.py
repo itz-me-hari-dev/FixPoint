@@ -1,15 +1,17 @@
-from django.shortcuts import render ,redirect
+from django.shortcuts import render,redirect
 from django.template.context_processors import request
 from django.utils.datastructures import MultiValueDictKeyError
 from django.core.files.storage import FileSystemStorage
 from UserApp.models import UserDb
+from AdminApp.models import ServiceCategoryDb
 from django.contrib import messages
 
 
 # Create your views here.
 
 def home(request):
-    return render(request,"index.html")
+    categories = ServiceCategoryDb.objects.all()
+    return render(request,"index.html",{"categories":categories})
 
 def user_authentication(request):
     return render(request,"user-authentication.html")
