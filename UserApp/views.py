@@ -89,6 +89,9 @@ def user_logout(request):
 
     return redirect(home)
 
+def service_provider_dashboard(request):
+    return render(request,"service-provider-dashboard.html")
+
 
 
 
