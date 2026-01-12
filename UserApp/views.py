@@ -77,7 +77,12 @@ def user_sign_in(request):
         request.session["user_id"] = user.id
         request.session["user_role"] = user.user_role
 
-        if request.session["user_role"] == 'SERVICE_PROVIDER'
+        if request.session["user_role"] == 'SERVICE_PROVIDER':
+            return redirect(service_provider_dashboard)
+
+        elif request.session["user_role"] == 'CUSTOMER':
+            return redirect(home)
+
 
     return redirect(user_authentication)
 

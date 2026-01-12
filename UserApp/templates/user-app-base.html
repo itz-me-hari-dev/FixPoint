@@ -82,7 +82,7 @@
                 </button>
                 <div class="collapse navbar-collapse" id="navbarCollapse">
                     <div class="navbar-nav">
-                        <a href="#" class="nav-item nav-link active">Home</a>
+                        <a href="{% url 'home' %}" class="nav-item nav-link active">Home</a>
                         <a href="#" class="nav-item nav-link">About</a>
                         <a href="#" class="nav-item nav-link">Services</a>
                         <!-- <div class="nav-item dropdown">
@@ -98,7 +98,11 @@
                         <div class="nav-item dropdown">
                             <a href="#" class="nav-link dropdown-toggle" data-bs-toggle="dropdown">{{ request.session.username }}</a>
                             <div class="dropdown-menu bg-light rounded-0 rounded-bottom m-0">
-                                <a href="#" class="dropdown-item">Dashboard</a>
+                                {% if request.session.user_role == 'CUSTOMER' %}
+                                <a href="{% url 'customer_dashboard' %}" class="dropdown-item">Dashboard</a>
+                                {% elif request.session.user_role == 'SERVICE_PROVIDER' %}
+                                <a href="{% url 'service_provider_dashboard' %}" class="dropdown-item">Dashboard</a>
+                                {% endif %}
                                 <a href="{% url 'user_logout' %}" class="dropdown-item">Logout</a>
                             </div>
                         </div>
