@@ -77,7 +77,7 @@ def user_sign_in(request):
         request.session["user_id"] = user.id
         request.session["user_role"] = user.user_role
 
-        return redirect(home)
+        if request.session["user_role"] == 'SERVICE_PROVIDER'
 
     return redirect(user_authentication)
 
@@ -91,6 +91,9 @@ def user_logout(request):
 
 def service_provider_dashboard(request):
     return render(request,"service-provider-dashboard.html")
+
+def customer_dashboard(request):
+    return render(request,"customer-dashboard.html")
 
 
 
