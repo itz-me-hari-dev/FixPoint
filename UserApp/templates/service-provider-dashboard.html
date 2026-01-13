@@ -13,11 +13,12 @@
                 <h5 class="mb-4">Provider Panel</h5>
 
                 <ul class="nav flex-column gap-2">
-                    <li><a class="nav-link active" onclick="showSection('dashboard')">Dashboard</a></li>
-                    <li><a class="nav-link" onclick="showSection('profile')">My Profile</a></li>
-                    <li><a class="nav-link" onclick="showSection('work')">Work Session</a></li>
-                    <li><a class="nav-link" onclick="showSection('history')">Job History</a></li>
-                    <li><a class="nav-link" onclick="showSection('earnings')">Earnings</a></li>
+                    <a class="nav-link active" onclick="showSection('dashboard', this)">Dashboard</a>
+                    <a class="nav-link" onclick="showSection('profile', this)">My Profile</a>
+                    <a class="nav-link" onclick="showSection('work', this)">Work Session</a>
+                    <a class="nav-link" onclick="showSection('history', this)">Job History</a>
+                    <a class="nav-link" onclick="showSection('earnings', this)">Earnings</a>
+
                 </ul>
             </div>
         </div>
@@ -54,44 +55,95 @@
                 </div>
             </div>
 
-            <!-- MY PROFILE -->
-            <div id="profile" class="section d-none">
-                <div class="bg-light rounded shadow p-4">
-                    <h5 class="mb-4">My Profile</h5>
 
-                    <form method="post">
-                        {% csrf_token %}
+            <!-- MY PROFILE SECTION -->
+            <div id="profile" class="section d-none">
+
+                <div class="bg-light rounded shadow p-4">
+
+                    <!-- HEADER + STATUS -->
+                    <div class="d-flex justify-content-between align-items-center mb-4">
+                        <h5 class="mb-0">My Profile</h5>
+
+                        <!-- Change class based on status -->
+                        <span id="approvalBadge" class="badge bg-warning">
+                            Pending Approval
+                        </span>
+                        <!-- bg-success = Approved | bg-danger = Rejected -->
+                    </div>
+
+                    <!-- ===================== -->
+                    <!-- PROFILE VIEW MODE -->
+                    <!-- ===================== -->
+                    <div id="profileView">
+
+                        <div class="row g-3">
+
+                            <div class="col-md-6">
+                                <p class="fw-semibold mb-1">Full Name</p>
+                                <p id="viewFullName" class="text-muted">Not set</p>
+                            </div>
+
+                            <div class="col-md-6">
+                                <p class="fw-semibold mb-1">Service Type</p>
+                                <p id="viewServiceType" class="text-muted">Not set</p>
+                            </div>
+
+                            <div class="col-md-6">
+                                <p class="fw-semibold mb-1">Experience</p>
+                                <p id="viewExperience" class="text-muted">Not set</p>
+                            </div>
+
+                            <div class="col-md-6">
+                                <p class="fw-semibold mb-1">Hourly Rate</p>
+                                <p id="viewHourlyRate" class="text-muted">Not set</p>
+                            </div>
+
+                            <div class="col-md-12">
+                                <p class="fw-semibold mb-1">Location</p>
+                                <p id="viewLocation" class="text-muted">Not set</p>
+                            </div>
+
+                        </div>
+
+                        <button class="btn btn-outline-primary mt-4" onclick="enableEdit()">
+                            Edit Profile
+                        </button>
+                    </div>
+
+                    <!-- ===================== -->
+                    <!-- PROFILE EDIT MODE -->
+                    <!-- ===================== -->
+                    <div id="profileEdit" class="d-none">
 
                         <div class="row g-3">
 
                             <div class="col-md-6">
                                 <label class="form-label">Full Name</label>
-                                <input class="form-control" name="full_name">
+                                <input class="form-control" id="editFullName">
                             </div>
 
                             <div class="col-md-6">
                                 <label class="form-label">Service Type</label>
-                                <input class="form-control" name="service_type">
+                                <input class="form-control" id="editServiceType">
                             </div>
 
                             <div class="col-md-6">
                                 <label class="form-label">Experience (Years)</label>
-                                <input type="number" class="form-control" name="experience">
+                                <input type="number" class="form-control" id="editExperience">
                             </div>
 
                             <div class="col-md-6">
                                 <label class="form-label">Hourly Rate (₹)</label>
-                                <input type="number" class="form-control" name="hourly_rate" id="hourlyRate">
+                                <input type="number" class="form-control" id="editHourlyRate">
                             </div>
 
-                            <!-- LOCATION NAME -->
+                            <!-- LOCATION -->
                             <div class="col-md-8">
                                 <label class="form-label">Location (Town / Area)</label>
-                                <input class="form-control" name="location" id="location" placeholder="Town / Area">
-
+                                <input class="form-control" id="location">
                             </div>
 
-                            <!-- GET LOCATION BUTTON -->
                             <div class="col-md-4 d-flex align-items-end">
                                 <button type="button" class="btn btn-outline-primary w-100" onclick="getLocation()">
                                     Use Current Location
@@ -99,15 +151,20 @@
                             </div>
 
                             <!-- HIDDEN LAT / LONG -->
-                            <input type="hidden" name="latitude" id="latitude">
-                            <input type="hidden" name="longitude" id="longitude">
+                            <input type="hidden" id="latitude">
+                            <input type="hidden" id="longitude">
 
                         </div>
 
-                        <button class="btn btn-primary mt-4">Save Profile</button>
-                    </form>
+                        <div class="mt-4 d-flex gap-2">
+                            <button class="btn btn-primary" onclick="saveProfile()">Save</button>
+                            <button class="btn btn-secondary" onclick="cancelEdit()">Cancel</button>
+                        </div>
+                    </div>
+
                 </div>
             </div>
+
 
 
             <!-- WORK SESSION -->
@@ -169,81 +226,120 @@
 </div>
 
 <script>
-    function showSection(id) {
-        document.querySelectorAll('.section').forEach(sec => sec.classList.add('d-none'));
-        document.getElementById(id).classList.remove('d-none');
-        document.querySelectorAll('.nav-link').forEach(l => l.classList.remove('active'));
-        event.target.classList.add('active');
-    }
+function enableEdit() {
+    document.getElementById("profileView").classList.add("d-none");
+    document.getElementById("profileEdit").classList.remove("d-none");
 
-    let startTime, timer;
+    // Prefill edit fields
+    document.getElementById("editFullName").value =
+        document.getElementById("viewFullName").innerText !== "Not set"
+            ? document.getElementById("viewFullName").innerText : "";
 
-    function startJob() {
-        startTime = new Date();
-        timer = setInterval(updateTimer, 1000);
-    }
+    document.getElementById("editServiceType").value =
+        document.getElementById("viewServiceType").innerText !== "Not set"
+            ? document.getElementById("viewServiceType").innerText : "";
 
-    function stopJob() {
-        clearInterval(timer);
-    }
+    document.getElementById("editExperience").value =
+        document.getElementById("viewExperience").innerText !== "Not set"
+            ? document.getElementById("viewExperience").innerText : "";
 
-    function updateTimer() {
-        const diff = new Date() - startTime;
-        const h = Math.floor(diff / 3600000);
-        const m = Math.floor((diff % 3600000) / 60000);
-        const s = Math.floor((diff % 60000) / 1000);
+    document.getElementById("editHourlyRate").value =
+        document.getElementById("viewHourlyRate").innerText !== "Not set"
+            ? document.getElementById("viewHourlyRate").innerText.replace("₹","") : "";
 
-        document.getElementById("timer").innerText =
-            `${String(h).padStart(2, '0')}:${String(m).padStart(2, '0')}:${String(s).padStart(2, '0')}`;
+    document.getElementById("location").value =
+        document.getElementById("viewLocation").innerText !== "Not set"
+            ? document.getElementById("viewLocation").innerText : "";
+}
 
-        const rate = document.getElementById("hourlyRate").value || 0;
-        document.getElementById("wage").innerText = Math.floor((diff / 3600000) * rate);
-    }
+function cancelEdit() {
+    document.getElementById("profileEdit").classList.add("d-none");
+    document.getElementById("profileView").classList.remove("d-none");
+}
 
-    function getLocation() {
-        if (!navigator.geolocation) {
-            alert("Geolocation is not supported by your browser");
-            return;
+function saveProfile() {
+    document.getElementById("viewFullName").innerText =
+        document.getElementById("editFullName").value || "Not set";
+
+    document.getElementById("viewServiceType").innerText =
+        document.getElementById("editServiceType").value || "Not set";
+
+    document.getElementById("viewExperience").innerText =
+        document.getElementById("editExperience").value
+            ? document.getElementById("editExperience").value + " years"
+            : "Not set";
+
+    document.getElementById("viewHourlyRate").innerText =
+        document.getElementById("editHourlyRate").value
+            ? "₹" + document.getElementById("editHourlyRate").value
+            : "Not set";
+
+    document.getElementById("viewLocation").innerText =
+        document.getElementById("location").value || "Not set";
+
+    cancelEdit();
+}
+
+// LOCATION + REVERSE GEOCODING
+function getLocation() {
+    if (!navigator.geolocation) return;
+
+    navigator.geolocation.getCurrentPosition(async (pos) => {
+        const lat = pos.coords.latitude.toFixed(6);
+        const lon = pos.coords.longitude.toFixed(6);
+
+        document.getElementById("latitude").value = lat;
+        document.getElementById("longitude").value = lon;
+
+        try {
+            const res = await fetch(
+                `https://nominatim.openstreetmap.org/reverse?format=json&lat=${lat}&lon=${lon}`
+            );
+            const data = await res.json();
+            const addr = data.address || {};
+
+            document.getElementById("location").value =
+                addr.town || addr.city || addr.village || addr.suburb || "";
+        } catch (e) {
+            console.log("Reverse geocoding failed");
         }
-
-        navigator.geolocation.getCurrentPosition(
-            async function (position) {
-
-                const lat = position.coords.latitude.toFixed(6);
-                const lon = position.coords.longitude.toFixed(6);
-
-                // Set hidden fields
-                document.getElementById("latitude").value = lat;
-                document.getElementById("longitude").value = lon;
-
-                // Reverse Geocoding (OpenStreetMap)
-                try {
-                    const response = await fetch(
-                        `https://nominatim.openstreetmap.org/reverse?format=json&lat=${lat}&lon=${lon}`
-                    );
-                    const data = await response.json();
-
-                    // Best possible town/area name
-                    const address = data.address;
-                    const town =
-                        address.town ||
-                        address.city ||
-                        address.village ||
-                        address.suburb ||
-                        address.county ||
-                        "";
-
-                    document.getElementById("location").value = town;
-
-                } catch (error) {
-                    alert("Location found, but unable to fetch area name.");
-                }
-            },
-            function () {
-                alert("Please allow location access to continue.");
-            }
-        );
-    }
+    });
+}
 </script>
+
+
+<script>
+function showSection(sectionId, el) {
+
+    // hide all sections
+    document.querySelectorAll('.section').forEach(sec => {
+        sec.classList.add('d-none');
+    });
+
+    // show selected section
+    const activeSection = document.getElementById(sectionId);
+    if (activeSection) {
+        activeSection.classList.remove('d-none');
+    }
+
+    // remove active from all links
+    document.querySelectorAll('.nav-link').forEach(link => {
+        link.classList.remove('active', 'fw-bold');
+    });
+
+    // activate clicked link
+    if (el) {
+        el.classList.add('active', 'fw-bold');
+    }
+}
+</script>
+
+<script>
+document.addEventListener("DOMContentLoaded", function () {
+    const firstLink = document.querySelector('.nav-link');
+    showSection('dashboard', firstLink);
+});
+</script>
+
 
 {% endblock %}
