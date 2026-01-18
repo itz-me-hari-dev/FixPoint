@@ -59,6 +59,13 @@
             <!-- MY PROFILE SECTION -->
             <div id="profile" class="section d-none">
 
+                <!-- PROFILE PHOTO (VIEW MODE) -->
+                <div class="text-center mb-4">
+                    <img id="profilePhoto" src="https://via.placeholder.com/120" class="rounded-circle shadow"
+                        style="width:120px;height:120px;object-fit:cover;" alt="Profile Photo">
+                </div>
+
+
                 <div class="bg-light rounded shadow p-4">
 
                     <!-- HEADER + STATUS -->
@@ -115,6 +122,19 @@
                     <!-- PROFILE EDIT MODE -->
                     <!-- ===================== -->
                     <div id="profileEdit" class="d-none">
+
+                        <!-- PROFILE PHOTO (EDIT MODE) -->
+                        <div class="text-center mb-4">
+                            <img id="photoPreview" src="https://via.placeholder.com/120" class="rounded-circle shadow"
+                                style="width:120px;height:120px;object-fit:cover;" alt="Profile Photo">
+
+                            <div class="mt-2">
+                                <label class="btn btn-sm btn-outline-primary">
+                                    Change Photo
+                                    <input type="file" accept="image/*" hidden onchange="previewPhoto(event)">
+                                </label>
+                            </div>
+                        </div>
 
                         <div class="row g-3">
 
@@ -226,118 +246,138 @@
 </div>
 
 <script>
-function enableEdit() {
-    document.getElementById("profileView").classList.add("d-none");
-    document.getElementById("profileEdit").classList.remove("d-none");
+    function enableEdit() {
+        document.getElementById("profileView").classList.add("d-none");
+        document.getElementById("profileEdit").classList.remove("d-none");
 
-    // Prefill edit fields
-    document.getElementById("editFullName").value =
-        document.getElementById("viewFullName").innerText !== "Not set"
-            ? document.getElementById("viewFullName").innerText : "";
+        // Prefill edit fields
+        document.getElementById("editFullName").value =
+            document.getElementById("viewFullName").innerText !== "Not set"
+                ? document.getElementById("viewFullName").innerText : "";
 
-    document.getElementById("editServiceType").value =
-        document.getElementById("viewServiceType").innerText !== "Not set"
-            ? document.getElementById("viewServiceType").innerText : "";
+        document.getElementById("editServiceType").value =
+            document.getElementById("viewServiceType").innerText !== "Not set"
+                ? document.getElementById("viewServiceType").innerText : "";
 
-    document.getElementById("editExperience").value =
-        document.getElementById("viewExperience").innerText !== "Not set"
-            ? document.getElementById("viewExperience").innerText : "";
+        document.getElementById("editExperience").value =
+            document.getElementById("viewExperience").innerText !== "Not set"
+                ? document.getElementById("viewExperience").innerText : "";
 
-    document.getElementById("editHourlyRate").value =
-        document.getElementById("viewHourlyRate").innerText !== "Not set"
-            ? document.getElementById("viewHourlyRate").innerText.replace("₹","") : "";
+        document.getElementById("editHourlyRate").value =
+            document.getElementById("viewHourlyRate").innerText !== "Not set"
+                ? document.getElementById("viewHourlyRate").innerText.replace("₹", "") : "";
 
-    document.getElementById("location").value =
-        document.getElementById("viewLocation").innerText !== "Not set"
-            ? document.getElementById("viewLocation").innerText : "";
-}
+        document.getElementById("location").value =
+            document.getElementById("viewLocation").innerText !== "Not set"
+                ? document.getElementById("viewLocation").innerText : "";
+    }
 
-function cancelEdit() {
-    document.getElementById("profileEdit").classList.add("d-none");
-    document.getElementById("profileView").classList.remove("d-none");
-}
+    function cancelEdit() {
+        document.getElementById("profileEdit").classList.add("d-none");
+        document.getElementById("profileView").classList.remove("d-none");
+    }
 
-function saveProfile() {
-    document.getElementById("viewFullName").innerText =
-        document.getElementById("editFullName").value || "Not set";
+    function saveProfile() {
+        document.getElementById("viewFullName").innerText =
+            document.getElementById("editFullName").value || "Not set";
 
-    document.getElementById("viewServiceType").innerText =
-        document.getElementById("editServiceType").value || "Not set";
+        document.getElementById("viewServiceType").innerText =
+            document.getElementById("editServiceType").value || "Not set";
 
-    document.getElementById("viewExperience").innerText =
-        document.getElementById("editExperience").value
-            ? document.getElementById("editExperience").value + " years"
-            : "Not set";
+        document.getElementById("viewExperience").innerText =
+            document.getElementById("editExperience").value
+                ? document.getElementById("editExperience").value + " years"
+                : "Not set";
 
-    document.getElementById("viewHourlyRate").innerText =
-        document.getElementById("editHourlyRate").value
-            ? "₹" + document.getElementById("editHourlyRate").value
-            : "Not set";
+        document.getElementById("viewHourlyRate").innerText =
+            document.getElementById("editHourlyRate").value
+                ? "₹" + document.getElementById("editHourlyRate").value
+                : "Not set";
 
-    document.getElementById("viewLocation").innerText =
-        document.getElementById("location").value || "Not set";
+        document.getElementById("viewLocation").innerText =
+            document.getElementById("location").value || "Not set";
 
-    cancelEdit();
-}
+        cancelEdit();
 
-// LOCATION + REVERSE GEOCODING
-function getLocation() {
-    if (!navigator.geolocation) return;
-
-    navigator.geolocation.getCurrentPosition(async (pos) => {
-        const lat = pos.coords.latitude.toFixed(6);
-        const lon = pos.coords.longitude.toFixed(6);
-
-        document.getElementById("latitude").value = lat;
-        document.getElementById("longitude").value = lon;
-
-        try {
-            const res = await fetch(
-                `https://nominatim.openstreetmap.org/reverse?format=json&lat=${lat}&lon=${lon}`
-            );
-            const data = await res.json();
-            const addr = data.address || {};
-
-            document.getElementById("location").value =
-                addr.town || addr.city || addr.village || addr.suburb || "";
-        } catch (e) {
-            console.log("Reverse geocoding failed");
+        // sync photo from edit mode to view mode
+        const preview = document.getElementById("photoPreview");
+        if (preview && preview.src) {
+            document.getElementById("profilePhoto").src = preview.src;
         }
-    });
-}
+
+    }
+
+    // LOCATION + REVERSE GEOCODING
+    function getLocation() {
+        if (!navigator.geolocation) return;
+
+        navigator.geolocation.getCurrentPosition(async (pos) => {
+            const lat = pos.coords.latitude.toFixed(6);
+            const lon = pos.coords.longitude.toFixed(6);
+
+            document.getElementById("latitude").value = lat;
+            document.getElementById("longitude").value = lon;
+
+            try {
+                const res = await fetch(
+                    `https://nominatim.openstreetmap.org/reverse?format=json&lat=${lat}&lon=${lon}`
+                );
+                const data = await res.json();
+                const addr = data.address || {};
+
+                document.getElementById("location").value =
+                    addr.town || addr.city || addr.village || addr.suburb || "";
+            } catch (e) {
+                console.log("Reverse geocoding failed");
+            }
+        });
+    }
 </script>
 
 <script>
-function showSection(sectionId, el) {
+    function showSection(sectionId, el) {
 
-    // hide all sections
-    document.querySelectorAll('.section').forEach(sec => {
-        sec.classList.add('d-none');
-    });
+        // hide all sections
+        document.querySelectorAll('.section').forEach(sec => {
+            sec.classList.add('d-none');
+        });
 
-    // show selected section
-    const activeSection = document.getElementById(sectionId);
-    if (activeSection) {
-        activeSection.classList.remove('d-none');
+        // show selected section
+        const activeSection = document.getElementById(sectionId);
+        if (activeSection) {
+            activeSection.classList.remove('d-none');
+        }
+
+        // remove active from all links
+        document.querySelectorAll('.nav-link').forEach(link => {
+            link.classList.remove('active', 'fw-bold');
+        });
+
+        // activate clicked link
+        if (el) {
+            el.classList.add('active', 'fw-bold');
+        }
     }
-
-    // remove active from all links
-    document.querySelectorAll('.nav-link').forEach(link => {
-        link.classList.remove('active', 'fw-bold');
-    });
-
-    // activate clicked link
-    if (el) {
-        el.classList.add('active', 'fw-bold');
-    }
-}
 </script>
 
 <script>
-document.addEventListener("DOMContentLoaded", function () {
-    const firstLink = document.querySelector('.nav-link');
-    showSection('dashboard', firstLink);
-});
+    document.addEventListener("DOMContentLoaded", function () {
+        const firstLink = document.querySelector('.nav-link');
+        showSection('dashboard', firstLink);
+    });
+</script>
+
+<script>
+    function previewPhoto(event) {
+        const file = event.target.files[0];
+        if (!file) return;
+
+        const reader = new FileReader();
+        reader.onload = function (e) {
+            document.getElementById("photoPreview").src = e.target.result;
+        };
+        reader.readAsDataURL(file);
+    }
 </script>
 
 
