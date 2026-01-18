@@ -59,30 +59,26 @@
             <!-- MY PROFILE SECTION -->
             <div id="profile" class="section d-none">
 
-                <!-- PROFILE PHOTO (VIEW MODE) -->
-                <div class="text-center mb-4">
-                    <img id="profilePhoto" src="https://via.placeholder.com/120" class="rounded-circle shadow"
-                        style="width:120px;height:120px;object-fit:cover;" alt="Profile Photo">
-                </div>
-
-
                 <div class="bg-light rounded shadow p-4">
 
                     <!-- HEADER + STATUS -->
                     <div class="d-flex justify-content-between align-items-center mb-4">
                         <h5 class="mb-0">My Profile</h5>
-
-                        <!-- Change class based on status -->
                         <span id="approvalBadge" class="badge bg-warning">
                             Pending Approval
                         </span>
-                        <!-- bg-success = Approved | bg-danger = Rejected -->
                     </div>
 
                     <!-- ===================== -->
                     <!-- PROFILE VIEW MODE -->
                     <!-- ===================== -->
                     <div id="profileView">
+
+                        <!-- PROFILE PHOTO (VIEW MODE) -->
+                        <div class="text-center mb-4">
+                            <img id="profilePhoto" src="https://via.placeholder.com/120" class="rounded-circle shadow"
+                                style="width:120px;height:120px;object-fit:cover;" alt="Profile Photo">
+                        </div>
 
                         <div class="row g-3">
 
@@ -118,16 +114,23 @@
                         </button>
                     </div>
 
+                    <!-- ===================== -->
                     <!-- PROFILE EDIT MODE -->
+                    <!-- ===================== -->
                     <div id="profileEdit" class="d-none">
 
-                        <!-- PROFILE PHOTO (VIEW MODE) -->
+                        <!-- PROFILE PHOTO (EDIT MODE) -->
                         <div class="text-center mb-4">
-                            <img id="profilePhoto" src="https://via.placeholder.com/120" class="rounded-circle shadow"
+                            <img id="photoPreview" src="https://via.placeholder.com/120" class="rounded-circle shadow"
                                 style="width:120px;height:120px;object-fit:cover;" alt="Profile Photo">
+
+                            <div class="mt-2">
+                                <label class="btn btn-sm btn-outline-primary">
+                                    Change Photo
+                                    <input type="file" accept="image/*" hidden onchange="previewPhoto(event)">
+                                </label>
+                            </div>
                         </div>
-
-
 
                         <div class="row g-3">
 
@@ -151,7 +154,6 @@
                                 <input type="number" class="form-control" id="editHourlyRate">
                             </div>
 
-                            <!-- LOCATION -->
                             <div class="col-md-8">
                                 <label class="form-label">Location (Town / Area)</label>
                                 <input class="form-control" id="location">
@@ -163,7 +165,6 @@
                                 </button>
                             </div>
 
-                            <!-- HIDDEN LAT / LONG -->
                             <input type="hidden" id="latitude">
                             <input type="hidden" id="longitude">
 
@@ -177,8 +178,6 @@
 
                 </div>
             </div>
-
-
 
             <!-- WORK SESSION -->
             <div id="work" class="section d-none">
@@ -239,9 +238,21 @@
 </div>
 
 <script>
+
+
     function enableEdit() {
+
+        // hide view content
         document.getElementById("profileView").classList.add("d-none");
+
+        // show edit content
         document.getElementById("profileEdit").classList.remove("d-none");
+
+        // 🔴 hide ONLY the view photo
+        const viewPhoto = document.getElementById("profilePhoto");
+        if (viewPhoto) {
+            viewPhoto.classList.add("d-none");
+        }
 
         // Prefill edit fields
         document.getElementById("editFullName").value =
@@ -265,10 +276,24 @@
                 ? document.getElementById("viewLocation").innerText : "";
     }
 
+
+
     function cancelEdit() {
+
+        // hide edit section
         document.getElementById("profileEdit").classList.add("d-none");
+
+        // show view section
         document.getElementById("profileView").classList.remove("d-none");
+
+        // 🟢 show view photo again
+        const viewPhoto = document.getElementById("profilePhoto");
+        if (viewPhoto) {
+            viewPhoto.classList.remove("d-none");
+        }
     }
+
+
 
     function saveProfile() {
         document.getElementById("viewFullName").innerText =
@@ -297,6 +322,12 @@
         if (preview && preview.src) {
             document.getElementById("profilePhoto").src = preview.src;
         }
+
+        const viewPhoto = document.getElementById("profilePhoto");
+        if (viewPhoto) {
+            viewPhoto.classList.remove("d-none");
+        }
+
 
     }
 
