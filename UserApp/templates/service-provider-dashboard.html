@@ -32,29 +32,6 @@
             </div>
 
             <!-- DASHBOARD -->
-            <!-- <div id="dashboard" class="section">
-                <div class="row g-4 mb-4">
-                    <div class="col-md-4">
-                        <div class="bg-light rounded shadow p-4 text-center">
-                            <h6>Status</h6>
-                            <span class="badge bg-success">Available</span>
-                        </div>
-                    </div>
-                    <div class="col-md-4">
-                        <div class="bg-light rounded shadow p-4 text-center">
-                            <h6>Active Job</h6>
-                            <p class="fw-bold mb-0">None</p>
-                        </div>
-                    </div>
-                    <div class="col-md-4">
-                        <div class="bg-light rounded shadow p-4 text-center">
-                            <h6>Today’s Earnings</h6>
-                            <h4 class="text-primary">₹0</h4>
-                        </div>
-                    </div>
-                </div>
-            </div> -->
-
             <div id="dashboard" class="section">
 
                 <!-- STATUS MESSAGE -->
@@ -171,9 +148,6 @@
                 </div>
 
             </div>
-
-
-
 
             <!-- MY PROFILE SECTION -->
             <div id="profile" class="section d-none">
@@ -299,61 +273,125 @@
             </div>
 
             <!-- WORK SESSION -->
-            <div id="work" class="section d-none">
-                <div class="bg-light rounded shadow p-4">
-                    <h5 class="mb-4">Work Session</h5>
+            <div class="bg-light rounded shadow p-4">
+                <h5 class="mb-4">Work Session</h5>
 
-                    <div class="row mb-3">
-                        <div class="col-md-6">
+                <div class="row mb-3">
+                    <div class="col-md-6">
+                        <p class="mb-1">Job Time</p>
+                        <h3 id="timer">00:00:00</h3>
+                    </div>
+                    <div class="col-md-6">
+                        <p class="mb-1">Wage</p>
+                        <h3 class="text-primary">₹ <span id="wage">0</span></h3>
+                    </div>
+                </div>
+
+                <div class="d-flex gap-2">
+                    <button class="btn btn-success w-50" onclick="startJob()">Start Job</button>
+                    <button class="btn btn-danger w-50" onclick="stopJob()">Stop Job</button>
+                </div>
+            </div>
+        </div> -->
+        <div id="work" class="section d-none">
+
+            <!-- STATUS BANNER -->
+            <div class="alert alert-secondary mb-4">
+                <i class="fa fa-info-circle me-2"></i>
+                Start a job when you arrive at the customer location.
+            </div>
+
+            <div class="bg-light rounded shadow p-4">
+
+                <h5 class="mb-4">
+                    <i class="fa fa-briefcase me-2 text-primary"></i>
+                    Work Session
+                </h5>
+
+                <!-- JOB METRICS -->
+                <div class="row g-4 mb-4">
+
+                    <!-- TIMER -->
+                    <div class="col-md-4">
+                        <div class="text-center border rounded p-3 h-100">
+                            <i class="fa fa-clock fa-2x text-secondary mb-2"></i>
                             <p class="mb-1">Job Time</p>
                             <h3 id="timer">00:00:00</h3>
                         </div>
-                        <div class="col-md-6">
-                            <p class="mb-1">Wage</p>
+                    </div>
+
+                    <!-- HOURLY RATE -->
+                    <div class="col-md-4">
+                        <div class="text-center border rounded p-3 h-100">
+                            <i class="fa fa-hourglass-half fa-2x text-secondary mb-2"></i>
+                            <p class="mb-1">Hourly Rate</p>
+                            <h3 class="text-primary">₹ <span id="hourlyRateView">0</span></h3>
+                        </div>
+                    </div>
+
+                    <!-- TOTAL WAGE -->
+                    <div class="col-md-4">
+                        <div class="text-center border rounded p-3 h-100">
+                            <i class="fa fa-wallet fa-2x text-primary mb-2"></i>
+                            <p class="mb-1">Current Wage</p>
                             <h3 class="text-primary">₹ <span id="wage">0</span></h3>
                         </div>
                     </div>
 
-                    <div class="d-flex gap-2">
-                        <button class="btn btn-success w-50" onclick="startJob()">Start Job</button>
-                        <button class="btn btn-danger w-50" onclick="stopJob()">Stop Job</button>
-                    </div>
                 </div>
-            </div>
 
-            <!-- JOB HISTORY -->
-            <div id="history" class="section d-none">
-                <div class="bg-light rounded shadow p-4">
-                    <h5 class="mb-4">Job History</h5>
-                    <table class="table">
-                        <tr>
-                            <th>Date</th>
-                            <th>Service</th>
-                            <th>Hours</th>
-                            <th>Amount</th>
-                        </tr>
-                        <tr>
-                            <td>12 Jan</td>
-                            <td>Plumbing</td>
-                            <td>2</td>
-                            <td>₹1000</td>
-                        </tr>
-                    </table>
+                <!-- JOB CONTROLS -->
+                <div class="d-flex gap-3">
+
+                    <button class="btn btn-success flex-fill" onclick="startJob()">
+                        <i class="fa fa-play me-2"></i>
+                        Start Job
+                    </button>
+
+                    <button class="btn btn-danger flex-fill" onclick="stopJob()">
+                        <i class="fa fa-stop me-2"></i>
+                        Stop Job
+                    </button>
+
                 </div>
-            </div>
 
-            <!-- EARNINGS -->
-            <div id="earnings" class="section d-none">
-                <div class="bg-light rounded shadow p-4">
-                    <h5 class="mb-4">Earnings</h5>
-                    <p>Today: <strong>₹0</strong></p>
-                    <p>This Month: <strong>₹12,500</strong></p>
-                    <p>Total: <strong>₹48,200</strong></p>
-                </div>
             </div>
-
         </div>
+
+
+        <!-- JOB HISTORY -->
+        <div id="history" class="section d-none">
+            <div class="bg-light rounded shadow p-4">
+                <h5 class="mb-4">Job History</h5>
+                <table class="table">
+                    <tr>
+                        <th>Date</th>
+                        <th>Service</th>
+                        <th>Hours</th>
+                        <th>Amount</th>
+                    </tr>
+                    <tr>
+                        <td>12 Jan</td>
+                        <td>Plumbing</td>
+                        <td>2</td>
+                        <td>₹1000</td>
+                    </tr>
+                </table>
+            </div>
+        </div>
+
+        <!-- EARNINGS -->
+        <div id="earnings" class="section d-none">
+            <div class="bg-light rounded shadow p-4">
+                <h5 class="mb-4">Earnings</h5>
+                <p>Today: <strong>₹0</strong></p>
+                <p>This Month: <strong>₹12,500</strong></p>
+                <p>Total: <strong>₹48,200</strong></p>
+            </div>
+        </div>
+
     </div>
+</div>
 </div>
 
 <script>
