@@ -2,7 +2,7 @@ from django.shortcuts import render,redirect
 from django.template.context_processors import request
 from django.utils.datastructures import MultiValueDictKeyError
 from django.core.files.storage import FileSystemStorage
-from UserApp.models import UserDb
+from UserApp.models import UserDb, ServiceProviderProfileDb
 from AdminApp.models import ServiceCategoryDb
 from django.contrib import messages
 
@@ -99,6 +99,45 @@ def service_provider_dashboard(request):
 
 def customer_dashboard(request):
     return render(request,"customer-dashboard.html")
+
+def create_service_provider_profile(request):
+    if request.method == "POST":
+
+        # Text fields
+        full_name = request.POST.get("full_name")
+        service_type = request.POST.get("service_type")
+        experience = request.POST.get("experience")
+        hourly_rate = request.POST.get("hourly_rate")
+        location = request.POST.get("location")
+
+        # Location coordinates
+        latitude = request.POST.get("latitude")
+        longitude = request.POST.get("longitude")
+
+        # File upload
+        profile_photo = request.FILES.get("profile_photo")
+
+
+        # save to table
+        ServiceProviderProfileDb.objects.create(
+            user=request.user,
+            full_name=full_name,
+            service_type=service_type,
+            experience=experience,
+            hourly_rate=hourly_rate,
+            location=location,
+            latitude=latitude,
+            longitude=longitude,
+            profile_photo=profile_photo
+        )
+
+        return redirect("service_provider_dashboard")
+
+
+
+
+
+
 
 
 

@@ -210,63 +210,94 @@
                     <!-- ===================== -->
                     <!-- PROFILE EDIT MODE -->
                     <!-- ===================== -->
-                    <div id="profileEdit" class="d-none">
+                    <div id="profileEdit" class="d-none border-top pt-4 mt-4">
 
-                        <!-- PROFILE PHOTO (EDIT MODE) -->
-                        <div class="text-center mb-4">
-                            <img id="photoPreview" src="https://via.placeholder.com/120" class="rounded-circle shadow"
-                                style="width:120px;height:120px;object-fit:cover;" alt="Profile Photo">
+                        <form id="profileForm" action="{% url 'create_service_provider_profile' %}" method="post"
+                            enctype="multipart/form-data">
 
-                            <div class="mt-2">
-                                <label class="btn btn-sm btn-outline-primary">
-                                    Change Photo
-                                    <input type="file" accept="image/*" hidden onchange="previewPhoto(event)">
-                                </label>
-                            </div>
-                        </div>
+                            {% csrf_token %}
 
-                        <div class="row g-3">
-
-                            <div class="col-md-6">
-                                <label class="form-label">Full Name</label>
-                                <input class="form-control" id="editFullName">
+                            <!-- EDIT MODE HEADER -->
+                            <div class="mb-3">
+                                <h6 class="text-primary mb-0">
+                                    <i class="fa fa-user-edit me-2"></i>
+                                    Edit Profile
+                                </h6>
+                                <small class="text-muted">
+                                    Update your professional details
+                                </small>
                             </div>
 
-                            <div class="col-md-6">
-                                <label class="form-label">Service Type</label>
-                                <input class="form-control" id="editServiceType">
+                            <!-- PROFILE PHOTO (EDIT MODE) -->
+                            <div class="text-center mb-4">
+                                <img id="photoPreview" src="https://via.placeholder.com/120"
+                                    class="rounded-circle shadow" style="width:120px;height:120px;object-fit:cover;"
+                                    alt="Profile Photo">
+
+                                <div class="mt-2">
+                                    <label class="btn btn-sm btn-outline-primary">
+                                        Change Photo
+                                        <input type="file" name="profile_photo" accept="image/*" hidden
+                                            onchange="previewPhoto(event)">
+                                    </label>
+                                </div>
                             </div>
 
-                            <div class="col-md-6">
-                                <label class="form-label">Experience (Years)</label>
-                                <input type="number" class="form-control" id="editExperience">
+                            <!-- FORM FIELDS -->
+                            <div class="row g-3">
+
+                                <div class="col-md-6">
+                                    <label class="form-label">Full Name</label>
+                                    <input class="form-control" id="editFullName" name="full_name" required>
+                                </div>
+
+                                <div class="col-md-6">
+                                    <label class="form-label">Service Type</label>
+                                    <input class="form-control" id="editServiceType" name="service_type" required>
+                                </div>
+
+                                <div class="col-md-6">
+                                    <label class="form-label">Experience (Years)</label>
+                                    <input type="number" class="form-control" id="editExperience" name="experience"
+                                        min="0" required>
+                                </div>
+
+                                <div class="col-md-6">
+                                    <label class="form-label">Hourly Rate (₹)</label>
+                                    <input type="number" class="form-control" id="editHourlyRate" name="hourly_rate"
+                                        min="0" required>
+                                </div>
+
+                                <div class="col-md-8">
+                                    <label class="form-label">Location (Town / Area)</label>
+                                    <input class="form-control" id="location" name="location" required>
+                                </div>
+
+                                <div class="col-md-4 d-flex align-items-end">
+                                    <button type="button" class="btn btn-outline-primary w-100" onclick="getLocation()">
+                                        Use Current Location
+                                    </button>
+                                </div>
+
+                                <!-- HIDDEN FIELDS -->
+                                <input type="hidden" id="latitude" name="latitude">
+                                <input type="hidden" id="longitude" name="longitude">
+
                             </div>
 
-                            <div class="col-md-6">
-                                <label class="form-label">Hourly Rate (₹)</label>
-                                <input type="number" class="form-control" id="editHourlyRate">
-                            </div>
-
-                            <div class="col-md-8">
-                                <label class="form-label">Location (Town / Area)</label>
-                                <input class="form-control" id="location">
-                            </div>
-
-                            <div class="col-md-4 d-flex align-items-end">
-                                <button type="button" class="btn btn-outline-primary w-100" onclick="getLocation()">
-                                    Use Current Location
+                            <!-- FORM ACTIONS -->
+                            <div class="mt-4 d-flex gap-2">
+                                <button type="submit" class="btn btn-primary">
+                                    <i class="fa fa-save me-2"></i>
+                                    Save Changes
+                                </button>
+                                <button type="button" class="btn btn-secondary" onclick="cancelEdit()">
+                                    Cancel
                                 </button>
                             </div>
 
-                            <input type="hidden" id="latitude">
-                            <input type="hidden" id="longitude">
+                        </form>
 
-                        </div>
-
-                        <div class="mt-4 d-flex gap-2">
-                            <button class="btn btn-primary" onclick="saveProfile()">Save</button>
-                            <button class="btn btn-secondary" onclick="cancelEdit()">Cancel</button>
-                        </div>
                     </div>
 
                 </div>
@@ -512,7 +543,7 @@
         // show edit content
         document.getElementById("profileEdit").classList.remove("d-none");
 
-        // 🔴 hide ONLY the view photo
+        // hide ONLY the view photo
         const viewPhoto = document.getElementById("profilePhoto");
         if (viewPhoto) {
             viewPhoto.classList.add("d-none");
