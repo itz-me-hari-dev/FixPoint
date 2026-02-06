@@ -94,44 +94,83 @@ def user_logout(request):
 
     return redirect(home)
 
-def service_provider_dashboard(request):
-    return render(request,"service-provider-dashboard.html")
 
 def customer_dashboard(request):
     return render(request,"customer-dashboard.html")
 
+def service_provider_dashboard(request):
+
+    if not request.session.get("username"):
+        return redirect("user_login")
+
+    user = UserDb.objects.get(username=request.session["username"])
+
+    try:
+        profile = ServiceProviderProfileDb.objects.get(user=user)
+    except ServiceProviderProfileDb.DoesNotExist:
+        profile = None
+
+    context = {
+        "profile": profile
+    }
+
+    return render(request, "service-provider-dashboard.html", context)
+
 def create_service_provider_profile(request):
+
+    # 🔐 Check login
+    if not request.session.get("username"):
+        return redirect("user_login")
+
     if request.method == "POST":
 
-        # Text fields
+        user = UserDb.objects.get(username=request.session["username"])
+
         full_name = request.POST.get("full_name")
         service_type = request.POST.get("service_type")
         experience = request.POST.get("experience")
         hourly_rate = request.POST.get("hourly_rate")
         location = request.POST.get("location")
 
-        # Location coordinates
         latitude = request.POST.get("latitude")
         longitude = request.POST.get("longitude")
 
-        # File upload
         profile_photo = request.FILES.get("profile_photo")
 
-
-        # save to table
-        ServiceProviderProfileDb.objects.create(
-            user=request.user,
-            full_name=full_name,
-            service_type=service_type,
-            experience=experience,
-            hourly_rate=hourly_rate,
-            location=location,
-            latitude=latitude,
-            longitude=longitude,
-            profile_photo=profile_photo
+        profile, created = ServiceProviderProfileDb.objects.get_or_create(
+            user=user,
+            defaults={
+                "full_name": full_name,
+                "service_type": service_type,
+                "experience": experience,
+                "hourly_rate": hourly_rate,
+                "location": location,
+                "latitude": latitude,
+                "longitude": longitude,
+            }
         )
 
+        if not created:
+            profile.full_name = full_name
+            profile.service_type = service_type
+            profile.experience = experience
+            profile.hourly_rate = hourly_rate
+            profile.location = location
+            profile.latitude = latitude
+            profile.longitude = longitude
+
+            # reset approval if edited
+            profile.approval_status = "PENDING"
+            profile.rejection_reason = None
+
+        if profile_photo:
+            profile.profile_photo = profile_photo
+
+        profile.save()
+
         return redirect("service_provider_dashboard")
+
+    return redirect("service_provider_dashboard")
 
 
 

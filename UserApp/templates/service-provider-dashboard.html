@@ -167,37 +167,60 @@
                     <!-- ===================== -->
                     <div id="profileView">
 
-                        <!-- PROFILE PHOTO (VIEW MODE) -->
+                        <!-- PROFILE PHOTO -->
                         <div class="text-center mb-4">
+                            {% if profile and profile.profile_photo %}
+                            <img id="profilePhoto" src="{{ profile.profile_photo.url }}" class="rounded-circle shadow"
+                                style="width:120px;height:120px;object-fit:cover;" alt="Profile Photo">
+                            {% else %}
                             <img id="profilePhoto" src="https://via.placeholder.com/120" class="rounded-circle shadow"
                                 style="width:120px;height:120px;object-fit:cover;" alt="Profile Photo">
+                            {% endif %}
                         </div>
 
                         <div class="row g-3">
 
                             <div class="col-md-6">
                                 <p class="fw-semibold mb-1">Full Name</p>
-                                <p id="viewFullName" class="text-muted">Not set</p>
+                                <p id="viewFullName" class="text-muted">
+                                    {{ profile.full_name|default:"Not set" }}
+                                </p>
                             </div>
 
                             <div class="col-md-6">
                                 <p class="fw-semibold mb-1">Service Type</p>
-                                <p id="viewServiceType" class="text-muted">Not set</p>
+                                <p id="viewServiceType" class="text-muted">
+                                    {{ profile.service_type|default:"Not set" }}
+                                </p>
                             </div>
 
                             <div class="col-md-6">
                                 <p class="fw-semibold mb-1">Experience</p>
-                                <p id="viewExperience" class="text-muted">Not set</p>
+                                <p id="viewExperience" class="text-muted">
+                                    {% if profile.experience %}
+                                    {{ profile.experience }} years
+                                    {% else %}
+                                    Not set
+                                    {% endif %}
+                                </p>
                             </div>
 
                             <div class="col-md-6">
                                 <p class="fw-semibold mb-1">Hourly Rate</p>
-                                <p id="viewHourlyRate" class="text-muted">Not set</p>
+                                <p id="viewHourlyRate" class="text-muted">
+                                    {% if profile.hourly_rate %}
+                                    ₹{{ profile.hourly_rate }}
+                                    {% else %}
+                                    Not set
+                                    {% endif %}
+                                </p>
                             </div>
 
                             <div class="col-md-12">
                                 <p class="fw-semibold mb-1">Location</p>
-                                <p id="viewLocation" class="text-muted">Not set</p>
+                                <p id="viewLocation" class="text-muted">
+                                    {{ profile.location|default:"Not set" }}
+                                </p>
                             </div>
 
                         </div>
@@ -206,6 +229,7 @@
                             Edit Profile
                         </button>
                     </div>
+
 
                     <!-- ===================== -->
                     <!-- PROFILE EDIT MODE -->
@@ -537,39 +561,16 @@
 
     function enableEdit() {
 
-        // hide view content
         document.getElementById("profileView").classList.add("d-none");
-
-        // show edit content
         document.getElementById("profileEdit").classList.remove("d-none");
 
-        // hide ONLY the view photo
-        const viewPhoto = document.getElementById("profilePhoto");
-        if (viewPhoto) {
-            viewPhoto.classList.add("d-none");
-        }
-
-        // Prefill edit fields
-        document.getElementById("editFullName").value =
-            document.getElementById("viewFullName").innerText !== "Not set"
-                ? document.getElementById("viewFullName").innerText : "";
-
-        document.getElementById("editServiceType").value =
-            document.getElementById("viewServiceType").innerText !== "Not set"
-                ? document.getElementById("viewServiceType").innerText : "";
-
-        document.getElementById("editExperience").value =
-            document.getElementById("viewExperience").innerText !== "Not set"
-                ? document.getElementById("viewExperience").innerText : "";
-
-        document.getElementById("editHourlyRate").value =
-            document.getElementById("viewHourlyRate").innerText !== "Not set"
-                ? document.getElementById("viewHourlyRate").innerText.replace("₹", "") : "";
-
-        document.getElementById("location").value =
-            document.getElementById("viewLocation").innerText !== "Not set"
-                ? document.getElementById("viewLocation").innerText : "";
+        document.getElementById("editFullName").value = "{{ profile.full_name|default:'' }}";
+        document.getElementById("editServiceType").value = "{{ profile.service_type|default:'' }}";
+        document.getElementById("editExperience").value = "{{ profile.experience|default:'' }}";
+        document.getElementById("editHourlyRate").value = "{{ profile.hourly_rate|default:'' }}";
+        document.getElementById("location").value = "{{ profile.location|default:'' }}";
     }
+
 
 
 
@@ -581,50 +582,13 @@
         // show view section
         document.getElementById("profileView").classList.remove("d-none");
 
-        // 🟢 show view photo again
+        // show view photo again
         const viewPhoto = document.getElementById("profilePhoto");
         if (viewPhoto) {
             viewPhoto.classList.remove("d-none");
         }
     }
 
-
-
-    function saveProfile() {
-        document.getElementById("viewFullName").innerText =
-            document.getElementById("editFullName").value || "Not set";
-
-        document.getElementById("viewServiceType").innerText =
-            document.getElementById("editServiceType").value || "Not set";
-
-        document.getElementById("viewExperience").innerText =
-            document.getElementById("editExperience").value
-                ? document.getElementById("editExperience").value + " years"
-                : "Not set";
-
-        document.getElementById("viewHourlyRate").innerText =
-            document.getElementById("editHourlyRate").value
-                ? "₹" + document.getElementById("editHourlyRate").value
-                : "Not set";
-
-        document.getElementById("viewLocation").innerText =
-            document.getElementById("location").value || "Not set";
-
-        cancelEdit();
-
-        // sync photo from edit mode to view mode
-        const preview = document.getElementById("photoPreview");
-        if (preview && preview.src) {
-            document.getElementById("profilePhoto").src = preview.src;
-        }
-
-        const viewPhoto = document.getElementById("profilePhoto");
-        if (viewPhoto) {
-            viewPhoto.classList.remove("d-none");
-        }
-
-
-    }
 
     // LOCATION + REVERSE GEOCODING
     function getLocation() {
