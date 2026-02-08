@@ -118,7 +118,6 @@ def service_provider_dashboard(request):
 
 def create_service_provider_profile(request):
 
-    # 🔐 Check login
     if not request.session.get("username"):
         return redirect("user_login")
 
@@ -129,28 +128,18 @@ def create_service_provider_profile(request):
         full_name = request.POST.get("full_name")
         service_type = request.POST.get("service_type")
         experience = request.POST.get("experience")
-        hourly_rate = request.POST.get("hourly_rate")
+        hourly_rate = request.POST.get("hourly_rate") or None
         location = request.POST.get("location")
 
-        latitude = request.POST.get("latitude")
-        longitude = request.POST.get("longitude")
+        latitude = request.POST.get("latitude") or None
+        longitude = request.POST.get("longitude") or None
 
         profile_photo = request.FILES.get("profile_photo")
 
-        profile, created = ServiceProviderProfileDb.objects.get_or_create(
-            user=user,
-            defaults={
-                "full_name": full_name,
-                "service_type": service_type,
-                "experience": experience,
-                "hourly_rate": hourly_rate,
-                "location": location,
-                "latitude": latitude,
-                "longitude": longitude,
-            }
-        )
+        # 🔹 Try updating first
+        try:
+            profile = ServiceProviderProfileDb.objects.get(user=user)
 
-        if not created:
             profile.full_name = full_name
             profile.service_type = service_type
             profile.experience = experience
@@ -159,10 +148,24 @@ def create_service_provider_profile(request):
             profile.latitude = latitude
             profile.longitude = longitude
 
-            # reset approval if edited
+            # reset approval on update
             profile.approval_status = "PENDING"
             profile.rejection_reason = None
 
+        except ServiceProviderProfileDb.DoesNotExist:
+            # 🔹 Create only if not exists
+            profile = ServiceProviderProfileDb(
+                user=user,
+                full_name=full_name,
+                service_type=service_type,
+                experience=experience,
+                hourly_rate=hourly_rate,
+                location=location,
+                latitude=latitude,
+                longitude=longitude,
+            )
+
+        # 🔹 Handle photo for both cases
         if profile_photo:
             profile.profile_photo = profile_photo
 

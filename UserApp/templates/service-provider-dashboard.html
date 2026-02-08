@@ -165,69 +165,94 @@
                     <!-- ===================== -->
                     <!-- PROFILE VIEW MODE -->
                     <!-- ===================== -->
+
                     <div id="profileView">
 
-                        <!-- PROFILE PHOTO -->
+                        <!-- PROFILE HEADER (SOCIAL STYLE) -->
                         <div class="text-center mb-4">
-                            {% if profile and profile.profile_photo %}
-                            <img id="profilePhoto" src="{{ profile.profile_photo.url }}" class="rounded-circle shadow"
-                                style="width:120px;height:120px;object-fit:cover;" alt="Profile Photo">
+
+                            <!-- PROFILE PHOTO -->
+                            <div class="mb-3">
+                                {% if profile and profile.profile_photo %}
+                                <img id="profilePhoto" src="{{ profile.profile_photo.url }}"
+                                    class="rounded-circle shadow" style="width:140px;height:140px;object-fit:cover;"
+                                    alt="Profile Photo">
+                                {% else %}
+                                <img id="profilePhoto" src="https://via.placeholder.com/140"
+                                    class="rounded-circle shadow" style="width:140px;height:140px;object-fit:cover;"
+                                    alt="Profile Photo">
+                                {% endif %}
+                            </div>
+
+                            <!-- NAME -->
+                            <h4 class="mb-1">
+                                {{ profile.full_name|default:"Your Name" }}
+                            </h4>
+
+                            <!-- ROLE / SERVICE -->
+                            <p class="text-muted mb-2">
+                                {{ profile.service_type|default:"Service Provider" }}
+                            </p>
+
+                            <!-- STATUS -->
+                            {% if profile.approval_status == "APPROVED" %}
+                            <span class="badge bg-success">Approved</span>
+                            {% elif profile.approval_status == "REJECTED" %}
+                            <span class="badge bg-danger">Rejected</span>
                             {% else %}
-                            <img id="profilePhoto" src="https://via.placeholder.com/120" class="rounded-circle shadow"
-                                style="width:120px;height:120px;object-fit:cover;" alt="Profile Photo">
+                            <span class="badge bg-warning">Pending Approval</span>
                             {% endif %}
+
                         </div>
 
-                        <div class="row g-3">
+                        <!-- PROFILE INFO CARDS -->
+                        <div class="row g-3 text-center mb-4">
 
-                            <div class="col-md-6">
-                                <p class="fw-semibold mb-1">Full Name</p>
-                                <p id="viewFullName" class="text-muted">
-                                    {{ profile.full_name|default:"Not set" }}
-                                </p>
+                            <div class="col-4">
+                                <div class="border rounded p-3 h-100">
+                                    <small class="text-muted d-block">Experience</small>
+                                    <strong>
+                                        {% if profile.experience %}
+                                        {{ profile.experience }} yrs
+                                        {% else %}
+                                        —
+                                        {% endif %}
+                                    </strong>
+                                </div>
                             </div>
 
-                            <div class="col-md-6">
-                                <p class="fw-semibold mb-1">Service Type</p>
-                                <p id="viewServiceType" class="text-muted">
-                                    {{ profile.service_type|default:"Not set" }}
-                                </p>
+                            <div class="col-4">
+                                <div class="border rounded p-3 h-100">
+                                    <small class="text-muted d-block">Rate</small>
+                                    <strong>
+                                        {% if profile.hourly_rate %}
+                                        ₹{{ profile.hourly_rate }}
+                                        {% else %}
+                                        —
+                                        {% endif %}
+                                    </strong>
+                                </div>
                             </div>
 
-                            <div class="col-md-6">
-                                <p class="fw-semibold mb-1">Experience</p>
-                                <p id="viewExperience" class="text-muted">
-                                    {% if profile.experience %}
-                                    {{ profile.experience }} years
-                                    {% else %}
-                                    Not set
-                                    {% endif %}
-                                </p>
-                            </div>
-
-                            <div class="col-md-6">
-                                <p class="fw-semibold mb-1">Hourly Rate</p>
-                                <p id="viewHourlyRate" class="text-muted">
-                                    {% if profile.hourly_rate %}
-                                    ₹{{ profile.hourly_rate }}
-                                    {% else %}
-                                    Not set
-                                    {% endif %}
-                                </p>
-                            </div>
-
-                            <div class="col-md-12">
-                                <p class="fw-semibold mb-1">Location</p>
-                                <p id="viewLocation" class="text-muted">
-                                    {{ profile.location|default:"Not set" }}
-                                </p>
+                            <div class="col-4">
+                                <div class="border rounded p-3 h-100">
+                                    <small class="text-muted d-block">Location</small>
+                                    <strong>
+                                        {{ profile.location|default:"—" }}
+                                    </strong>
+                                </div>
                             </div>
 
                         </div>
 
-                        <button class="btn btn-outline-primary mt-4" onclick="enableEdit()">
-                            Edit Profile
-                        </button>
+                        <!-- ACTION -->
+                        <div class="text-center">
+                            <button type="button" class="btn btn-outline-primary px-4" onclick="enableEdit()">
+                                <i class="fa fa-pen me-2"></i>
+                                Edit Profile
+                            </button>
+                        </div>
+
                     </div>
 
 

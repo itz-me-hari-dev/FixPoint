@@ -29,11 +29,25 @@ class ServiceProviderProfileDb(models.Model):
     full_name = models.CharField(max_length=150)
     service_type = models.CharField(max_length=100)
     experience = models.PositiveIntegerField()
-    hourly_rate = models.DecimalField(max_digits=8, decimal_places=2)
+    hourly_rate = models.DecimalField(
+        max_digits=8,
+        decimal_places=2
+    )
 
     location = models.CharField(max_length=150)
-    latitude = models.DecimalField(max_digits=9, decimal_places=6)
-    longitude = models.DecimalField(max_digits=9, decimal_places=6)
+    latitude = models.DecimalField(
+        max_digits=9,
+        decimal_places=6,
+        null=True,
+        blank=True
+    )
+
+    longitude = models.DecimalField(
+        max_digits=9,
+        decimal_places=6,
+        null=True,
+        blank=True
+    )
 
     is_available = models.BooleanField(default=True)
 
