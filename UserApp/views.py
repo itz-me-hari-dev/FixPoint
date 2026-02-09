@@ -1,10 +1,10 @@
-from django.shortcuts import render,redirect
-from django.template.context_processors import request
+from django.shortcuts import render,redirect, get_object_or_404
 from django.utils.datastructures import MultiValueDictKeyError
 from django.core.files.storage import FileSystemStorage
-from UserApp.models import UserDb, ServiceProviderProfileDb
+from UserApp.models import UserDb,ServiceProviderProfileDb,CustomerProfileDb
 from AdminApp.models import ServiceCategoryDb
 from django.contrib import messages
+from decimal import Decimal
 
 
 # Create your views here.
@@ -96,7 +96,34 @@ def user_logout(request):
 
 
 def customer_dashboard(request):
-    return render(request,"customer-dashboard.html")
+
+    if not request.session.get("username"):
+        return redirect("user_authentication")
+
+    user = UserDb.objects.get(username=request.session["username"])
+
+    profile = CustomerProfileDb.objects.filter(user=user).first()
+
+    # If profile not exists → go to create page
+    if not profile:
+        return redirect("create_customer_profile")  # URL NAME
+
+    # Update profile
+    if request.method == "POST":
+        profile.full_name = request.POST.get("full_name")
+        profile.phone_number = request.POST.get("phone_number")
+        profile.location = request.POST.get("location")
+        profile.latitude = request.POST.get("latitude") or None
+        profile.longitude = request.POST.get("longitude") or None
+        profile.save()
+
+        messages.success(request, "Profile updated successfully.")
+        return redirect("customer_dashboard")
+
+    return render(request, "customer-dashboard.html", {"profile": profile})
+
+
+
 
 def service_provider_dashboard(request):
 
@@ -116,6 +143,7 @@ def service_provider_dashboard(request):
 
     return render(request, "service-provider-dashboard.html", context)
 
+
 def create_service_provider_profile(request):
 
     if not request.session.get("username"):
@@ -128,15 +156,18 @@ def create_service_provider_profile(request):
         full_name = request.POST.get("full_name")
         service_type = request.POST.get("service_type")
         experience = request.POST.get("experience")
-        hourly_rate = request.POST.get("hourly_rate") or None
         location = request.POST.get("location")
 
-        latitude = request.POST.get("latitude") or None
-        longitude = request.POST.get("longitude") or None
+        hourly_rate_raw = request.POST.get("hourly_rate")
+        latitude_raw = request.POST.get("latitude")
+        longitude_raw = request.POST.get("longitude")
+
+        hourly_rate = Decimal(hourly_rate_raw) if hourly_rate_raw else None
+        latitude = Decimal(latitude_raw) if latitude_raw else None
+        longitude = Decimal(longitude_raw) if longitude_raw else None
 
         profile_photo = request.FILES.get("profile_photo")
 
-        # 🔹 Try updating first
         try:
             profile = ServiceProviderProfileDb.objects.get(user=user)
 
@@ -148,12 +179,10 @@ def create_service_provider_profile(request):
             profile.latitude = latitude
             profile.longitude = longitude
 
-            # reset approval on update
             profile.approval_status = "PENDING"
             profile.rejection_reason = None
 
         except ServiceProviderProfileDb.DoesNotExist:
-            # 🔹 Create only if not exists
             profile = ServiceProviderProfileDb(
                 user=user,
                 full_name=full_name,
@@ -165,7 +194,6 @@ def create_service_provider_profile(request):
                 longitude=longitude,
             )
 
-        # 🔹 Handle photo for both cases
         if profile_photo:
             profile.profile_photo = profile_photo
 
@@ -175,6 +203,38 @@ def create_service_provider_profile(request):
 
     return redirect("service_provider_dashboard")
 
+
+def create_customer_profile(request):
+
+    if not request.session.get("username"):
+        return redirect("user_authentication")
+
+    user = UserDb.objects.get(username=request.session["username"])
+
+    # If already exists → go dashboard (prevents loop)
+    if CustomerProfileDb.objects.filter(user=user).exists():
+        return redirect("customer_dashboard")
+
+    if request.method == "POST":
+
+        full_name = request.POST.get("full_name")
+        phone_number = request.POST.get("phone_number")
+        location = request.POST.get("location")
+        latitude = request.POST.get("latitude")
+        longitude = request.POST.get("longitude")
+
+        CustomerProfileDb.objects.create(
+            user=user,
+            full_name=full_name,
+            phone_number=phone_number,
+            location=location,
+            latitude=latitude or None,
+            longitude=longitude or None,
+        )
+
+        return redirect("customer_dashboard")
+
+    return redirect("customer_dashboard")
 
 
 

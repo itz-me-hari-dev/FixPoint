@@ -57,4 +57,45 @@ class ServiceProviderProfileDb(models.Model):
         default='PENDING'
     )
 
+    profile_photo = models.ImageField(
+        upload_to="provider_photos/",
+        null=True,
+        blank=True
+    )
+
     rejection_reason = models.TextField(blank=True, null=True)
+
+    created_at = models.DateTimeField(auto_now_add=True)
+
+    def __str__(self):
+        return f"{self.full_name} (ServiceProvider)"
+
+
+class CustomerProfileDb(models.Model):
+
+    user = models.OneToOneField(UserDb, on_delete=models.CASCADE)
+
+    full_name = models.CharField(max_length=150)
+    phone_number = models.CharField(max_length=15)
+    location = models.CharField(max_length=150)
+
+    latitude = models.DecimalField(
+        max_digits=9,
+        decimal_places=6,
+        null=True,
+        blank=True
+    )
+
+    longitude = models.DecimalField(
+        max_digits=9,
+        decimal_places=6,
+        null=True,
+        blank=True
+    )
+
+    created_at = models.DateTimeField(auto_now_add=True)
+
+    rejection_reason = models.TextField(blank=True, null=True)
+
+    def __str__(self):
+        return f"{self.full_name} (Customer)"

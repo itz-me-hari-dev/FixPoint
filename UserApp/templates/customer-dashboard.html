@@ -4,5 +4,325 @@
 
 {% block content %}
 
+<div class="container-fluid py-4">
+    <div class="row">
+
+        <!-- SIDEBAR -->
+        <!-- DESKTOP SIDEBAR -->
+        <div class="col-lg-3 col-md-4 d-none d-md-block">
+            <div class="bg-light rounded shadow p-4 h-100">
+                <h5 class="mb-4">Customer Panel</h5>
+
+                <ul class="nav flex-column gap-2">
+                    <a class="nav-link active" onclick="showSection('dashboard', this)">Dashboard</a>
+                    <a class="nav-link" onclick="showSection('profile', this)">My Profile</a>
+                    <a class="nav-link" onclick="showSection('history', this)">Service History</a>
+                </ul>
+            </div>
+        </div>
+        <!-- MOBILE DROPDOWN MENU -->
+        <div class="d-md-none mb-3">
+            <div class="dropdown">
+                <button class="btn btn-outline-primary w-100 dropdown-toggle" type="button" data-bs-toggle="dropdown">
+                    Customer Menu
+                </button>
+
+                <ul class="dropdown-menu w-100 shadow">
+                    <li>
+                        <a class="dropdown-item active" onclick="showSection('dashboard', this)">
+                            Dashboard
+                        </a>
+                    </li>
+                    <li>
+                        <a class="dropdown-item" onclick="showSection('profile', this)">
+                            My Profile
+                        </a>
+                    </li>
+                    <li>
+                        <a class="dropdown-item" onclick="showSection('history', this)">
+                            Service History
+                        </a>
+                    </li>
+                </ul>
+            </div>
+        </div>
+        <!-- SIDEBAR ENDS -->
+
+
+        <!-- MAIN CONTENT -->
+        <div class="col-lg-9 col-md-8">
+
+            <!-- DASHBOARD -->
+            <div id="dashboard" class="section">
+
+                <div class="alert alert-info mb-4">
+                    <i class="fa fa-info-circle me-2"></i>
+                    Welcome back! Manage your services and profile here.
+                </div>
+
+                <div class="row g-4 mb-4">
+
+                    <div class="col-md-4">
+                        <div class="bg-light rounded shadow p-4 text-center h-100">
+                            <i class="fa fa-user fa-2x text-primary mb-2"></i>
+                            <h6 class="mb-1">Profile Status</h6>
+                            <p class="fw-bold mb-0">Completed</p>
+                        </div>
+                    </div>
+
+                    <div class="col-md-4">
+                        <div class="bg-light rounded shadow p-4 text-center h-100">
+                            <i class="fa fa-clipboard-list fa-2x text-success mb-2"></i>
+                            <h6 class="mb-1">Total Bookings</h6>
+                            <h4 class="mb-0">5</h4>
+                        </div>
+                    </div>
+
+                    <div class="col-md-4">
+                        <div class="bg-light rounded shadow p-4 text-center h-100">
+                            <i class="fa fa-wallet fa-2x text-warning mb-2"></i>
+                            <h6 class="mb-1">Total Spent</h6>
+                            <h4 class="mb-0">₹4,250</h4>
+                        </div>
+                    </div>
+
+                </div>
+
+                <!-- QUICK ACTIONS -->
+                <div class="bg-light rounded shadow p-4">
+                    <h6 class="mb-3">
+                        <i class="fa fa-bolt me-2 text-primary"></i>
+                        Quick Actions
+                    </h6>
+
+                    <div class="d-grid gap-2">
+                        <button class="btn btn-outline-primary">
+                            <i class="fa fa-search me-2"></i>
+                            Book New Service
+                        </button>
+
+                        <button class="btn btn-outline-secondary" onclick="showSection('history', this)">
+                            <i class="fa fa-history me-2"></i>
+                            View Service History
+                        </button>
+                    </div>
+                </div>
+
+            </div>
+
+            <!-- PROFILE -->
+            <div id="profile" class="section d-none">
+
+                <div class="bg-light rounded shadow p-4">
+
+                    <h5 class="mb-4">My Profile</h5>
+
+                    <!-- PROFILE VIEW -->
+                    <div id="profileView">
+
+                        <div class="text-center mb-4">
+                            <h4 class="mt-3">{{ profile.full_name }}</h4>
+                            <p class="text-muted">{{ profile.location }}</p>
+                        </div>
+
+                        <div class="row g-3 mb-4">
+                            <div class="col-md-6">
+                                <div class="border rounded p-3">
+                                    <small class="text-muted">Phone</small>
+                                    <strong>{{ profile.phone_number }}</strong>
+                                </div>
+                            </div>
+
+                            <div class="col-md-6">
+                                <div class="border rounded p-3">
+                                    <small class="text-muted">Email</small>
+                                    <strong>{{ request.user.email }}</strong>
+                                </div>
+                            </div>
+
+                            <div class="col-12">
+                                <div class="border rounded p-3">
+                                    <small class="text-muted">Address</small>
+                                    <strong>{{ profile.location }}</strong>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="text-center">
+                            <button class="btn btn-outline-primary" onclick="enableEdit()">
+                                <i class="fa fa-pen me-2"></i>
+                                Edit Profile
+                            </button>
+                        </div>
+                    </div>
+
+
+                    <!-- PROFILE EDIT -->
+                    <div id="profileEdit" class="d-none border-top pt-4 mt-4">
+
+                        <form method="POST" action="{% url 'save_customer_profile' %}">
+                            {% csrf_token %}
+
+                            <div class="row g-3">
+                                <div class="col-md-6">
+                                    <label class="form-label">Full Name</label>
+                                    <input class="form-control" name="full_name" value="{{ profile.full_name }}"
+                                        required>
+                                </div>
+
+                                <div class="col-md-6">
+                                    <label class="form-label">Phone</label>
+                                    <input class="form-control" name="phone_number" value="{{ profile.phone_number }}"
+                                        required>
+                                </div>
+
+                                <div class="col-md-8">
+                                    <label class="form-label">Location (Town / Area)</label>
+                                    <input class="form-control" id="location" name="location"
+                                        value="{{ profile.location }}" readonly placeholder="Auto-filled using GPS"
+                                        required>
+                                </div>
+
+                                <div class="col-md-4 d-flex align-items-end">
+                                    <button type="button" class="btn btn-outline-primary w-100" onclick="getLocation()">
+                                        Use Current Location
+                                    </button>
+                                </div>
+
+                                <input type="hidden" id="latitude" name="latitude" value="{{ profile.latitude }}">
+                                <input type="hidden" id="longitude" name="longitude" value="{{ profile.longitude }}">
+                            </div>
+
+                            <div class="mt-4 d-flex gap-2">
+                                <button type="submit" class="btn btn-primary">
+                                    <i class="fa fa-save me-2"></i>
+                                    Save Changes
+                                </button>
+
+                                <button type="button" class="btn btn-secondary" onclick="cancelEdit()">
+                                    Cancel
+                                </button>
+                            </div>
+                        </form>
+
+                    </div>
+
+                </div>
+            </div>
+
+
+            <!-- SERVICE HISTORY -->
+            <div id="history" class="section d-none">
+
+                <div class="bg-light rounded shadow p-4">
+
+                    <h5 class="mb-4">
+                        <i class="fa fa-history me-2 text-primary"></i>
+                        Service History
+                    </h5>
+
+                    <div class="table-responsive">
+                        <table class="table table-hover align-middle">
+                            <thead class="table-light">
+                                <tr>
+                                    <th>Date</th>
+                                    <th>Service</th>
+                                    <th>Provider</th>
+                                    <th>Amount</th>
+                                    <th>Status</th>
+                                </tr>
+                            </thead>
+
+                            <tbody>
+                                <tr>
+                                    <td>15 Jan 2026</td>
+                                    <td>Plumbing</td>
+                                    <td>Rahul</td>
+                                    <td class="fw-bold text-primary">₹1,200</td>
+                                    <td><span class="badge bg-success">Completed</span></td>
+                                </tr>
+
+                                <tr>
+                                    <td>10 Jan 2026</td>
+                                    <td>Electrical</td>
+                                    <td>Anil</td>
+                                    <td class="fw-bold text-primary">₹850</td>
+                                    <td><span class="badge bg-warning">Pending</span></td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+
+                </div>
+            </div>
+
+        </div>
+
+    </div>
+</div>
+
+<script>
+    function enableEdit() {
+        document.getElementById("profileView").classList.add("d-none");
+        document.getElementById("profileEdit").classList.remove("d-none");
+    }
+
+    function cancelEdit() {
+        document.getElementById("profileEdit").classList.add("d-none");
+        document.getElementById("profileView").classList.remove("d-none");
+    }
+
+    function showSection(sectionId, el) {
+        document.querySelectorAll('.section').forEach(sec => sec.classList.add('d-none'));
+        document.getElementById(sectionId).classList.remove('d-none');
+
+        document.querySelectorAll('.nav-link').forEach(link => link.classList.remove('active', 'fw-bold'));
+        if (el) el.classList.add('active', 'fw-bold');
+    }
+
+    document.addEventListener("DOMContentLoaded", function () {
+        showSection('dashboard', document.querySelector('.nav-link'));
+    });
+</script>
+
+<script>
+    function getLocation() {
+        if (!navigator.geolocation) {
+            alert("Geolocation not supported");
+            return;
+        }
+
+        navigator.geolocation.getCurrentPosition(
+            async (pos) => {
+                const lat = pos.coords.latitude.toFixed(6);
+                const lon = pos.coords.longitude.toFixed(6);
+
+                document.getElementById("latitude").value = lat;
+                document.getElementById("longitude").value = lon;
+
+                try {
+                    const res = await fetch(
+                        `https://nominatim.openstreetmap.org/reverse?format=json&lat=${lat}&lon=${lon}`
+                    );
+                    const data = await res.json();
+                    const addr = data.address || {};
+
+                    document.getElementById("location").value =
+                        addr.suburb ||
+                        addr.village ||
+                        addr.town ||
+                        addr.city ||
+                        "";
+                } catch (e) {
+                    alert("Location found, but area name not available");
+                }
+            },
+            () => {
+                alert("Please allow location access");
+            }
+        );
+    }
+
+</script>
 
 {% endblock %}

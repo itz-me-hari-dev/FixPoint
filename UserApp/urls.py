@@ -10,4 +10,6 @@ urlpatterns = [
     path("service_provider_dashboard/",views.service_provider_dashboard,name="service_provider_dashboard"),
     path("create_service_provider_profile/",views.create_service_provider_profile,name="create_service_provider_profile"),
     path("customer_dashboard/",views.customer_dashboard,name="customer_dashboard"),
+    path("create_customer_profile", views.create_customer_profile, name="create_customer_profile"),
+
 ]
