@@ -96,10 +96,10 @@
                     </h6>
 
                     <div class="d-grid gap-2">
-                        <button class="btn btn-outline-primary">
+                        <a href="{% url 'customer_service_post_page' %}" class="btn btn-outline-primary">
                             <i class="fa fa-search me-2"></i>
                             Book New Service
-                        </button>
+                        </a>
 
                         <button class="btn btn-outline-secondary" onclick="showSection('history', this)">
                             <i class="fa fa-history me-2"></i>
@@ -136,7 +136,7 @@
                             <div class="col-md-6">
                                 <div class="border rounded p-3">
                                     <small class="text-muted">Email</small>
-                                    <strong>{{ request.user.email }}</strong>
+                                    <strong>{{ user.email }}</strong>
                                 </div>
                             </div>
 
@@ -160,7 +160,7 @@
                     <!-- PROFILE EDIT -->
                     <div id="profileEdit" class="d-none border-top pt-4 mt-4">
 
-                        <form method="POST" action="{% url 'save_customer_profile' %}">
+                        <form method="POST" action="{% url 'manage_customer_profile' %}">
                             {% csrf_token %}
 
                             <div class="row g-3">

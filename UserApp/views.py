@@ -39,13 +39,14 @@ def user_sign_up(request):
         if password != confirm_password:
             return redirect(user_authentication)
 
-
+        is_approved = True if user_role == "CUSTOMER" else False
 
         UserDb.objects.create(
             username=username,
             email=email,
             password=password,
-            user_role=user_role
+            user_role=user_role,
+            is_approved=is_approved
         )
 
         return redirect(user_authentication)
@@ -94,43 +95,13 @@ def user_logout(request):
 
     return redirect(home)
 
-
-def customer_dashboard(request):
-
-    if not request.session.get("username"):
-        return redirect("user_authentication")
-
-    user = UserDb.objects.get(username=request.session["username"])
-
-    profile = CustomerProfileDb.objects.filter(user=user).first()
-
-    # If profile not exists → go to create page
-    if not profile:
-        return redirect("create_customer_profile")  # URL NAME
-
-    # Update profile
-    if request.method == "POST":
-        profile.full_name = request.POST.get("full_name")
-        profile.phone_number = request.POST.get("phone_number")
-        profile.location = request.POST.get("location")
-        profile.latitude = request.POST.get("latitude") or None
-        profile.longitude = request.POST.get("longitude") or None
-        profile.save()
-
-        messages.success(request, "Profile updated successfully.")
-        return redirect("customer_dashboard")
-
-    return render(request, "customer-dashboard.html", {"profile": profile})
-
-
-
-
 def service_provider_dashboard(request):
 
     if not request.session.get("username"):
         return redirect("user_login")
 
     user = UserDb.objects.get(username=request.session["username"])
+    service_categories = ServiceCategoryDb.objects.all()
 
     try:
         profile = ServiceProviderProfileDb.objects.get(user=user)
@@ -138,13 +109,13 @@ def service_provider_dashboard(request):
         profile = None
 
     context = {
-        "profile": profile
+        "profile": profile,
+        "service_categories":service_categories
     }
 
     return render(request, "service-provider-dashboard.html", context)
 
-
-def create_service_provider_profile(request):
+def manage_service_provider_profile(request):
 
     if not request.session.get("username"):
         return redirect("user_login")
@@ -153,49 +124,38 @@ def create_service_provider_profile(request):
 
         user = UserDb.objects.get(username=request.session["username"])
 
-        full_name = request.POST.get("full_name")
-        service_type = request.POST.get("service_type")
-        experience = request.POST.get("experience")
-        location = request.POST.get("location")
+        try:
+            profile = ServiceProviderProfileDb.objects.get(user=user)
+            created = False
+        except ServiceProviderProfileDb.DoesNotExist:
+            profile = ServiceProviderProfileDb(user=user)
+            created = True
+
+        profile.full_name = request.POST.get("full_name")
+        profile.service_type = request.POST.get("service_type")
+
+        experience_raw = request.POST.get("experience")
+        profile.experience = int(experience_raw) if experience_raw else 0
+
+        profile.location = request.POST.get("location")
 
         hourly_rate_raw = request.POST.get("hourly_rate")
+        profile.hourly_rate = Decimal(hourly_rate_raw) if hourly_rate_raw else Decimal("0.00")
+
         latitude_raw = request.POST.get("latitude")
         longitude_raw = request.POST.get("longitude")
 
-        hourly_rate = Decimal(hourly_rate_raw) if hourly_rate_raw else None
-        latitude = Decimal(latitude_raw) if latitude_raw else None
-        longitude = Decimal(longitude_raw) if longitude_raw else None
+        profile.latitude = Decimal(latitude_raw) if latitude_raw else None
+        profile.longitude = Decimal(longitude_raw) if longitude_raw else None
 
         profile_photo = request.FILES.get("profile_photo")
-
-        try:
-            profile = ServiceProviderProfileDb.objects.get(user=user)
-
-            profile.full_name = full_name
-            profile.service_type = service_type
-            profile.experience = experience
-            profile.hourly_rate = hourly_rate
-            profile.location = location
-            profile.latitude = latitude
-            profile.longitude = longitude
-
-            profile.approval_status = "PENDING"
-            profile.rejection_reason = None
-
-        except ServiceProviderProfileDb.DoesNotExist:
-            profile = ServiceProviderProfileDb(
-                user=user,
-                full_name=full_name,
-                service_type=service_type,
-                experience=experience,
-                hourly_rate=hourly_rate,
-                location=location,
-                latitude=latitude,
-                longitude=longitude,
-            )
-
         if profile_photo:
             profile.profile_photo = profile_photo
+
+        # Reset approval only when updating
+        if not created:
+            profile.approval_status = "PENDING"
+            profile.rejection_reason = None
 
         profile.save()
 
@@ -203,41 +163,104 @@ def create_service_provider_profile(request):
 
     return redirect("service_provider_dashboard")
 
+def toggle_availability(request):
 
-def create_customer_profile(request):
+    if not request.session.get("username"):
+        return redirect("user_login")
+
+    user = UserDb.objects.get(username=request.session["username"])
+
+    try:
+        profile = ServiceProviderProfileDb.objects.get(user=user)
+
+        profile.is_available = not profile.is_available
+        profile.save()
+
+    except ServiceProviderProfileDb.DoesNotExist:
+        pass
+
+    return redirect("service_provider_dashboard")
+
+def customer_dashboard(request):
+
+    if not request.session.get("username"):
+        return redirect("user_login")
+
+    user = UserDb.objects.get(username=request.session["username"])
+
+    try:
+        profile = CustomerProfileDb.objects.get(user=user)
+    except CustomerProfileDb.DoesNotExist:
+        profile = None
+
+    context = {
+        "profile": profile,
+        "user":user
+    }
+
+    return render(request, "customer-dashboard.html", context)
+
+def manage_customer_profile(request):
 
     if not request.session.get("username"):
         return redirect("user_authentication")
 
     user = UserDb.objects.get(username=request.session["username"])
 
-    # If already exists → go dashboard (prevents loop)
-    if CustomerProfileDb.objects.filter(user=user).exists():
-        return redirect("customer_dashboard")
+    profile, created = CustomerProfileDb.objects.get_or_create(
+        user=user
+    )
 
     if request.method == "POST":
 
-        full_name = request.POST.get("full_name")
-        phone_number = request.POST.get("phone_number")
-        location = request.POST.get("location")
+        profile.full_name = request.POST.get("full_name")
+        profile.phone_number = request.POST.get("phone_number")
+        profile.location = request.POST.get("location")
+
         latitude = request.POST.get("latitude")
         longitude = request.POST.get("longitude")
 
-        CustomerProfileDb.objects.create(
-            user=user,
-            full_name=full_name,
-            phone_number=phone_number,
-            location=location,
-            latitude=latitude or None,
-            longitude=longitude or None,
-        )
+        profile.latitude = latitude or None
+        profile.longitude = longitude or None
+
+        profile.save()
+
+        if not user.is_approved:
+            user.is_approved = True
+            user.save(update_fields=["is_approved"])
 
         return redirect("customer_dashboard")
 
     return redirect("customer_dashboard")
 
+def customer_service_post_page(request):
 
+    service_categories = ServiceCategoryDb.objects.all()
+    service_post = ServiceProviderProfileDb.objects.filter(is_available=True)
 
+    selected_category = request.GET.get("category")
+    location = request.GET.get("location")
+
+    # Category filter
+    if selected_category:
+        category_obj = ServiceCategoryDb.objects.get(id=selected_category)
+        service_post = service_post.filter(
+            service_type=category_obj.category_name
+        )
+
+    # Location filter
+    if location:
+        service_post = service_post.filter(
+            location__icontains=location
+        )
+
+    context = {
+        "service_categories": service_categories,
+        "service_post": service_post,
+        "selected_category": selected_category,
+    }
+
+    return render(request, "customer-service-post-page.html", context)
 
 
 

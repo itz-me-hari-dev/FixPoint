@@ -132,10 +132,23 @@
                                     Update Profile
                                 </button>
 
-                                <button class="btn btn-outline-success">
-                                    <i class="fa fa-toggle-on me-2"></i>
-                                    Go Available
-                                </button>
+                                <form method="post" action="{% url 'toggle_availability' %}" class="d-grid">
+                                    {% csrf_token %}
+
+                                    <button type="submit"
+                                        class="btn {% if profile.is_available %}btn-outline-success{% else %}btn-outline-danger{% endif %} w-100">
+
+                                        <i
+                                            class="fa {% if profile.is_available %}fa-toggle-on{% else %}fa-toggle-off{% endif %} me-2"></i>
+
+                                        {% if profile.is_available %}
+                                        Go Busy
+                                        {% else %}
+                                        Go Available
+                                        {% endif %}
+
+                                    </button>
+                                </form>
 
                                 <button class="btn btn-outline-secondary">
                                     <i class="fa fa-history me-2"></i>
@@ -165,7 +178,6 @@
                     <!-- ===================== -->
                     <!-- PROFILE VIEW MODE -->
                     <!-- ===================== -->
-
                     <div id="profileView">
 
                         <!-- PROFILE HEADER (SOCIAL STYLE) -->
@@ -261,7 +273,7 @@
                     <!-- ===================== -->
                     <div id="profileEdit" class="d-none border-top pt-4 mt-4">
 
-                        <form id="profileForm" action="{% url 'create_service_provider_profile' %}" method="post"
+                        <form id="profileForm" action="{% url 'manage_service_provider_profile' %}" method="post"
                             enctype="multipart/form-data">
 
                             {% csrf_token %}
@@ -279,7 +291,8 @@
 
                             <!-- PROFILE PHOTO (EDIT MODE) -->
                             <div class="text-center mb-4">
-                                <img id="photoPreview" src="https://via.placeholder.com/120"
+                                <img id="photoPreview"
+                                    src="{% if profile and profile.profile_photo %}{{ profile.profile_photo.url }}{% else %}https://via.placeholder.com/120{% endif %}"
                                     class="rounded-circle shadow" style="width:120px;height:120px;object-fit:cover;"
                                     alt="Profile Photo">
 
@@ -292,34 +305,54 @@
                                 </div>
                             </div>
 
+
                             <!-- FORM FIELDS -->
                             <div class="row g-3">
 
+                                <!-- FULL NAME -->
                                 <div class="col-md-6">
                                     <label class="form-label">Full Name</label>
-                                    <input class="form-control" id="editFullName" name="full_name" required>
+                                    <input class="form-control" name="full_name"
+                                        value="{{ profile.full_name|default:'' }}" required>
                                 </div>
 
+                                <!-- SERVICE TYPE -->
                                 <div class="col-md-6">
                                     <label class="form-label">Service Type</label>
-                                    <input class="form-control" id="editServiceType" name="service_type" required>
+                                    <select class="form-select" name="service_type" required>
+                                        <option value="">Select Service</option>
+
+                                        {% for category in service_categories %}
+                                        <option value="{{ category.category_name }}"
+                                        {% if profile and profile.service_type == category.category_name %}
+                                        selected
+                                        {% endif %}>
+                                            {{ category.category_name }}
+                                        </option>
+                                        {% endfor %}
+                                    </select>
+
                                 </div>
 
+                                <!-- EXPERIENCE -->
                                 <div class="col-md-6">
                                     <label class="form-label">Experience (Years)</label>
-                                    <input type="number" class="form-control" id="editExperience" name="experience"
-                                        min="0" required>
+                                    <input type="number" class="form-control" name="experience" min="0"
+                                        value="{{ profile.experience|default:'' }}" required>
                                 </div>
 
+                                <!-- HOURLY RATE -->
                                 <div class="col-md-6">
                                     <label class="form-label">Hourly Rate (₹)</label>
-                                    <input type="number" class="form-control" id="editHourlyRate" name="hourly_rate"
-                                        min="0" required>
+                                    <input type="number" class="form-control" name="hourly_rate" min="0"
+                                        value="{{ profile.hourly_rate|default:'' }}" required>
                                 </div>
 
+                                <!-- LOCATION -->
                                 <div class="col-md-8">
                                     <label class="form-label">Location (Town / Area)</label>
-                                    <input class="form-control" id="location" name="location" required>
+                                    <input class="form-control" name="location"
+                                        value="{{ profile.location|default:'' }}" required>
                                 </div>
 
                                 <div class="col-md-4 d-flex align-items-end">
@@ -328,11 +361,13 @@
                                     </button>
                                 </div>
 
-                                <!-- HIDDEN FIELDS -->
-                                <input type="hidden" id="latitude" name="latitude">
-                                <input type="hidden" id="longitude" name="longitude">
+                                <!-- HIDDEN LAT/LONG -->
+                                <input type="hidden" name="latitude" value="{{ profile.latitude|default:'' }}">
+
+                                <input type="hidden" name="longitude" value="{{ profile.longitude|default:'' }}">
 
                             </div>
+
 
                             <!-- FORM ACTIONS -->
                             <div class="mt-4 d-flex gap-2">
@@ -472,7 +507,6 @@
 
                 </div>
             </div>
-
 
             <!-- EARNINGS -->
             <div id="earnings" class="section d-none">

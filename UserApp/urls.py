@@ -8,8 +8,11 @@ urlpatterns = [
     path("user_sign_in/",views.user_sign_in,name="user_sign_in"),
     path("user_logout/",views.user_logout,name="user_logout"),
     path("service_provider_dashboard/",views.service_provider_dashboard,name="service_provider_dashboard"),
-    path("create_service_provider_profile/",views.create_service_provider_profile,name="create_service_provider_profile"),
+    path("manage_service_provider_profile/",views.manage_service_provider_profile,name="manage_service_provider_profile"),
     path("customer_dashboard/",views.customer_dashboard,name="customer_dashboard"),
-    path("create_customer_profile", views.create_customer_profile, name="create_customer_profile"),
+    path("manage_customer_profile", views.manage_customer_profile, name="manage_customer_profile"),
+    path("customer_service_post_page", views.customer_service_post_page, name="customer_service_post_page"),
+    path('toggle-availability/', views.toggle_availability, name='toggle_availability'),
+
 
 ]

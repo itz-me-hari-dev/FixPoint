@@ -1,0 +1,73 @@
+{% extends 'user-app-base.html' %}
+{% load static %}
+{% block title %}Find Services - FixPoint{% endblock %}
+
+{% block content %}
+<div class="container py-4">
+
+    <h4 class="mb-4">Find Service Providers</h4>
+
+    <!-- SEARCH & FILTER -->
+    <form method="GET" class="row g-3 align-items-end mb-4">
+
+        <!-- Category -->
+        <div class="col-md-4">
+            <label class="form-label small text-muted">Category</label>
+            <select class="form-select" name="category">
+                <option value="">All Categories</option>
+
+                {% for category in service_categories %}
+                <option value="{{ category.id }}"
+                    {% if selected_category == category.id|stringformat:"s" %} 
+                        selected 
+                    {% endif %}>
+                    {{ category.category_name }}
+                </option>
+                {% endfor %}
+            </select>
+        </div>
+
+        <!-- Location -->
+        <div class="col-md-4">
+            <label class="form-label small text-muted">Location</label>
+            <input type="text" class="form-control" name="location" value="{{ request.GET.location }}"
+                placeholder="Enter location">
+        </div>
+
+        <!-- Button -->
+        <div class="col-md-4">
+            <button type="submit" class="btn btn-primary w-100">
+                Search
+            </button>
+        </div>
+
+    </form>
+
+
+    <!-- SERVICE PROVIDER POSTS -->
+    <div class="row g-4">
+
+        <!-- CARD -->
+        {% for post in service_post %}
+        <div class="col-md-6 col-lg-4">
+            <div class="bg-light border rounded shadow-sm p-3 h-100">
+                <h6>{{ post.full_name}}</h6>
+                <span class="badge bg-primary">{{ post.service_type }}</span>
+
+                <p class="mt-2 mb-1">Experience: {{ post.experience}}</p>
+                <p class="mb-1">Location: {{ post.location}}</p>
+                <p class="fw-bold text-success">₹{{ post.hourly_rate}} / hour</p>
+
+                <a href="#" class="btn btn-outline-primary btn-sm w-100">
+                    View & Book
+                </a>
+            </div>
+        </div>
+        {% endfor %}
+
+        <!-- more cards later -->
+
+    </div>
+
+</div>
+{% endblock %}

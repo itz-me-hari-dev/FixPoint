@@ -12,15 +12,3 @@ class ServiceCategoryDb(models.Model):
 
 
 
-# class CustomerProfileDb(models.Model):
-#     user = models.OneToOneField(UserDb, on_delete=models.CASCADE)
-#     full_name = models.CharField(max_length=150)
-#     phone_number = models.CharField(max_length=15)
-#     address = models.TextField()
-#     location = models.CharField(max_length=150)
-#     latitude = models.DecimalField(max_digits=9, decimal_places=6)
-#     longitude = models.DecimalField(max_digits=9, decimal_places=6)
-#
-
-
-
