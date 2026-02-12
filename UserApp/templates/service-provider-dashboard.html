@@ -175,9 +175,7 @@
                         </span>
                     </div>
 
-                    <!-- ===================== -->
                     <!-- PROFILE VIEW MODE -->
-                    <!-- ===================== -->
                     <div id="profileView">
 
                         <!-- PROFILE HEADER (SOCIAL STYLE) -->
@@ -220,6 +218,7 @@
                         <!-- PROFILE INFO CARDS -->
                         <div class="row g-3 text-center mb-4">
 
+                            <!-- EXPERIENCE -->
                             <div class="col-4">
                                 <div class="border rounded p-3 h-100">
                                     <small class="text-muted d-block">Experience</small>
@@ -233,6 +232,7 @@
                                 </div>
                             </div>
 
+                            <!-- RATE -->
                             <div class="col-4">
                                 <div class="border rounded p-3 h-100">
                                     <small class="text-muted d-block">Rate</small>
@@ -246,6 +246,7 @@
                                 </div>
                             </div>
 
+                            <!-- LOCATION -->
                             <div class="col-4">
                                 <div class="border rounded p-3 h-100">
                                     <small class="text-muted d-block">Location</small>
@@ -255,7 +256,28 @@
                                 </div>
                             </div>
 
+                            <!-- EMAIL -->
+                            <div class="col-6">
+                                <div class="border rounded p-3 h-100">
+                                    <small class="text-muted d-block">Email</small>
+                                    <strong>
+                                        {{ profile.user.email }}
+                                    </strong>
+                                </div>
+                            </div>
+
+                            <!-- PHONE -->
+                            <div class="col-6">
+                                <div class="border rounded p-3 h-100">
+                                    <small class="text-muted d-block">Phone</small>
+                                    <strong>
+                                        {{ profile.phone_number|default:"—" }}
+                                    </strong>
+                                </div>
+                            </div>
+
                         </div>
+
 
                         <!-- ACTION -->
                         <div class="text-center">
@@ -268,9 +290,7 @@
                     </div>
 
 
-                    <!-- ===================== -->
                     <!-- PROFILE EDIT MODE -->
-                    <!-- ===================== -->
                     <div id="profileEdit" class="d-none border-top pt-4 mt-4">
 
                         <form id="profileForm" action="{% url 'manage_service_provider_profile' %}" method="post"
@@ -323,9 +343,9 @@
                                         <option value="">Select Service</option>
 
                                         {% for category in service_categories %}
-                                        <option value="{{ category.category_name }}"
+                                        <option value="{{ category.category_name }}" 
                                         {% if profile and profile.service_type == category.category_name %}
-                                        selected
+                                            selected 
                                         {% endif %}>
                                             {{ category.category_name }}
                                         </option>
@@ -333,6 +353,21 @@
                                     </select>
 
                                 </div>
+
+                                <!-- EMAIL -->
+                                <div class="col-md-6">
+                                    <label class="form-label">Email</label>
+                                    <input type="email" class="form-control" name="email"
+                                        value="{{ profile.user.email }}" required>
+                                </div>
+
+                                <!-- PHONE NUMBER -->
+                                <div class="col-md-6">
+                                    <label class="form-label">Phone Number</label>
+                                    <input type="text" class="form-control" name="phone_number" maxlength="15"
+                                        value="{{ profile.phone_number|default:'' }}" required>
+                                </div>
+
 
                                 <!-- EXPERIENCE -->
                                 <div class="col-md-6">

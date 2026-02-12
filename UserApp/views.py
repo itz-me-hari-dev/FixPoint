@@ -124,14 +124,19 @@ def manage_service_provider_profile(request):
 
         user = UserDb.objects.get(username=request.session["username"])
 
-        try:
-            profile = ServiceProviderProfileDb.objects.get(user=user)
-            created = False
-        except ServiceProviderProfileDb.DoesNotExist:
-            profile = ServiceProviderProfileDb(user=user)
-            created = True
+        # try:
+        #     profile = ServiceProviderProfileDb.objects.get(user=user)
+        #     created = False
+        # except ServiceProviderProfileDb.DoesNotExist:
+        #     profile = ServiceProviderProfileDb(user=user)
+        #     created = True
+
+        profile , created = ServiceProviderProfileDb.objects.get_or_create(
+            user=user
+        )
 
         profile.full_name = request.POST.get("full_name")
+        profile.phone_number = request.POST.get("phone_number")
         profile.service_type = request.POST.get("service_type")
 
         experience_raw = request.POST.get("experience")
