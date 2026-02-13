@@ -1,0 +1,87 @@
+{% extends 'user-app-base.html' %}
+{% load static %}
+{% block title %}Provider Profile - FixPoint{% endblock %}
+
+{% block content %}
+<div class="container py-5">
+
+    <div class="card shadow-lg border-0">
+        <div class="card-body p-4">
+
+            <div class="row">
+
+                <!-- LEFT SIDE IMAGE -->
+                <div class="col-md-4 text-center">
+
+                    {% if provider.profile_photo %}
+                        <img src="{{ provider.profile_photo.url }}"
+                             class="rounded-circle shadow"
+                             style="width:150px;height:150px;object-fit:cover;">
+                    {% else %}
+                        <img src="{% static 'images/default-user.png' %}"
+                             class="rounded-circle shadow"
+                             style="width:150px;height:150px;object-fit:cover;">
+                    {% endif %}
+
+                    <h5 class="mt-3">{{ provider.full_name }}</h5>
+
+                    <span class="badge bg-primary">
+                        {{ provider.service_type }}
+                    </span>
+
+                </div>
+
+                <!-- RIGHT SIDE DETAILS -->
+                <div class="col-md-8">
+
+                    <h6 class="mb-3">Provider Details</h6>
+
+                    <p>
+                        <strong>Experience:</strong>
+                        {{ provider.experience }} years
+                    </p>
+
+                    <p>
+                        <strong>Hourly Rate:</strong>
+                        ₹{{ provider.hourly_rate }} / hour
+                    </p>
+
+                    <p>
+                        <strong>Location:</strong>
+                        {{ provider.location }}
+                    </p>
+
+                    <p>
+                        <strong>Phone:</strong>
+                        {{ provider.phone_number }}
+                    </p>
+
+                    <p>
+                        <strong>Status:</strong>
+                        {% if provider.is_available %}
+                            <span class="badge bg-success">Available</span>
+                        {% else %}
+                            <span class="badge bg-danger">Not Available</span>
+                        {% endif %}
+                    </p>
+
+                    <div class="mt-4">
+                        <a href="#" class="btn btn-primary">
+                            Book Service
+                        </a>
+
+                        <a href="{% url 'customer_service_post_page' %}"
+                           class="btn btn-outline-secondary">
+                            Back
+                        </a>
+                    </div>
+
+                </div>
+
+            </div>
+
+        </div>
+    </div>
+
+</div>
+{% endblock %}

@@ -17,13 +17,11 @@
                 <option value="">All Categories</option>
 
                 {% for category in service_categories %}
-                <option value="{{ category.id }}"
-                    {% if selected_category == category.id|stringformat:"s" %} 
-                        selected 
-                    {% endif %}>
-                    {{ category.category_name }}
-                </option>
-                {% endfor %}
+                <option value="{{ category.id }}" 
+                {% if selected_category == category.id|stringformat:"s" %} 
+                    selected 
+                {% endif %} {{ category.category_name }} </option>
+                    {% endfor %}
             </select>
         </div>
 
@@ -51,21 +49,58 @@
         {% for post in service_post %}
         <div class="col-md-6 col-lg-4">
             <div class="bg-light border rounded shadow-sm p-3 h-100">
-                <h6>{{ post.full_name}}</h6>
-                <span class="badge bg-primary">{{ post.service_type }}</span>
 
-                <p class="mt-2 mb-1">Experience: {{ post.experience}}</p>
-                <p class="mb-1">Location: {{ post.location}}</p>
-                <p class="fw-bold text-success">₹{{ post.hourly_rate}} / hour</p>
+                <!-- PROFILE IMAGE -->
+                <div class="text-center mb-3">
+                    {% if post.profile_photo %}
+                    <img src="{{ post.profile_photo.url }}" class="rounded-circle shadow"
+                        style="width:90px; height:90px; object-fit:cover;" alt="Profile Photo">
+                    {% else %}
+                    <img src="{% static 'images/default-user.png' %}" class="rounded-circle shadow"
+                        style="width:90px; height:90px; object-fit:cover;" alt="Default Photo">
+                    {% endif %}
+                </div>
 
-                <a href="#" class="btn btn-outline-primary btn-sm w-100">
+                <!-- NAME -->
+                <h6 class="text-center mb-1">{{ post.full_name }}</h6>
+
+                <!-- CATEGORY -->
+                <div class="text-center mb-2">
+                    <span class="badge bg-primary">
+                        {{ post.service_type }}
+                    </span>
+                </div>
+
+                <!-- DETAILS -->
+                <p class="mb-1">
+                    <i class="fa fa-briefcase me-1 text-muted"></i>
+                    Experience: {{ post.experience }} years
+                </p>
+
+                <p class="mb-1">
+                    <i class="fa fa-map-marker-alt me-1 text-muted"></i>
+                    {{ post.location }}
+                </p>
+
+                <p class="mb-1">
+                    <i class="fa fa-phone me-1 text-muted"></i>
+                    {{ post.phone_number }}
+                </p>
+
+                <p class="fw-bold text-success mb-3">
+                    ₹{{ post.hourly_rate }} / hour
+                </p>
+
+                <!-- BUTTON -->
+                <a href="{% url 'provider_profile_view' provider_id=post.id %}" class="btn btn-outline-primary btn-sm w-100">
                     View & Book
                 </a>
+
             </div>
         </div>
+
         {% endfor %}
 
-        <!-- more cards later -->
 
     </div>
 

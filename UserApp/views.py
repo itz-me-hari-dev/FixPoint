@@ -267,7 +267,24 @@ def customer_service_post_page(request):
 
     return render(request, "customer-service-post-page.html", context)
 
+def provider_profile_view(request, provider_id):
 
+    provider = get_object_or_404(
+        ServiceProviderProfileDb,
+        id=provider_id,
+        is_available=True,
+        # approval_status="APPROVED"
+    )
+
+    context = {
+        "provider": provider
+    }
+
+    return render(
+        request,
+        "provider-profile-view.html",
+        context
+    )
 
 
 

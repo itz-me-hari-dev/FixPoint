@@ -12,7 +12,8 @@ urlpatterns = [
     path("customer_dashboard/",views.customer_dashboard,name="customer_dashboard"),
     path("manage_customer_profile", views.manage_customer_profile, name="manage_customer_profile"),
     path("customer_service_post_page", views.customer_service_post_page, name="customer_service_post_page"),
-    path('toggle-availability/', views.toggle_availability, name='toggle_availability'),
+    path('toggle_availability/', views.toggle_availability, name='toggle_availability'),
+    path('provider_profile_view/<int:provider_id>/', views.provider_profile_view, name='provider_profile_view'),
 
 
 ]
