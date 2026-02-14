@@ -20,8 +20,8 @@
                 <option value="{{ category.id }}" 
                 {% if selected_category == category.id|stringformat:"s" %} 
                     selected 
-                {% endif %} {{ category.category_name }} </option>
-                    {% endfor %}
+                {% endif %} >{{ category.category_name }} </option>
+                {% endfor %}
             </select>
         </div>
 
