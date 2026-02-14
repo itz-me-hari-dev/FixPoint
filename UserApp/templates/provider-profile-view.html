@@ -5,75 +5,95 @@
 {% block content %}
 <div class="container py-5">
 
-    <div class="card shadow-lg border-0">
-        <div class="card-body p-4">
+    <!-- PROFILE CARD -->
+    <div class="card shadow-lg border-0 rounded-4 overflow-hidden">
 
-            <div class="row">
+        <div class="card-body p-5">
 
-                <!-- LEFT SIDE IMAGE -->
-                <div class="col-md-4 text-center">
+            <div class="row g-5">
 
+                <!-- LEFT SIDE -->
+                <div class="col-lg-4 text-center border-end">
+
+                    <!-- Profile Image -->
                     {% if provider.profile_photo %}
-                        <img src="{{ provider.profile_photo.url }}"
-                             class="rounded-circle shadow"
-                             style="width:150px;height:150px;object-fit:cover;">
+                    <img src="{{ provider.profile_photo.url }}" class="rounded-circle shadow-lg mb-3"
+                        style="width:180px;height:180px;object-fit:cover;">
                     {% else %}
-                        <img src="{% static 'images/default-user.png' %}"
-                             class="rounded-circle shadow"
-                             style="width:150px;height:150px;object-fit:cover;">
+                    <img src="{% static 'images/default-user.png' %}" class="rounded-circle shadow-lg mb-3"
+                        style="width:180px;height:180px;object-fit:cover;">
                     {% endif %}
 
-                    <h5 class="mt-3">{{ provider.full_name }}</h5>
+                    <h4 class="fw-bold mb-1">{{ provider.full_name }}</h4>
 
-                    <span class="badge bg-primary">
+                    <span class="badge bg-primary px-3 py-2 mt-2">
                         {{ provider.service_type }}
                     </span>
 
+                    <div class="mt-3">
+                        {% if provider.is_available %}
+                        <span class="badge bg-success px-3 py-2">
+                            Available Now
+                        </span>
+                        {% else %}
+                        <span class="badge bg-danger px-3 py-2">
+                            Currently Unavailable
+                        </span>
+                        {% endif %}
+                    </div>
+
                 </div>
 
-                <!-- RIGHT SIDE DETAILS -->
-                <div class="col-md-8">
+                <!-- RIGHT SIDE -->
+                <div class="col-lg-8">
 
-                    <h6 class="mb-3">Provider Details</h6>
+                    <h5 class="fw-semibold mb-4 border-bottom pb-2">
+                        Professional Information
+                    </h5>
 
-                    <p>
-                        <strong>Experience:</strong>
-                        {{ provider.experience }} years
-                    </p>
+                    <div class="row mb-4">
 
-                    <p>
-                        <strong>Hourly Rate:</strong>
-                        ₹{{ provider.hourly_rate }} / hour
-                    </p>
+                        <div class="col-md-6 mb-3">
+                            <small class="text-muted">Experience</small>
+                            <h6 class="fw-bold">
+                                {{ provider.experience }} Years
+                            </h6>
+                        </div>
 
-                    <p>
-                        <strong>Location:</strong>
-                        {{ provider.location }}
-                    </p>
+                        <div class="col-md-6 mb-3">
+                            <small class="text-muted">Hourly Rate</small>
+                            <h6 class="fw-bold text-success">
+                                ₹{{ provider.hourly_rate }} / hour
+                            </h6>
+                        </div>
 
-                    <p>
-                        <strong>Phone:</strong>
-                        {{ provider.phone_number }}
-                    </p>
+                        <div class="col-md-6 mb-3">
+                            <small class="text-muted">Location</small>
+                            <h6 class="fw-bold">
+                                {{ provider.location }}
+                            </h6>
+                        </div>
 
-                    <p>
-                        <strong>Status:</strong>
-                        {% if provider.is_available %}
-                            <span class="badge bg-success">Available</span>
-                        {% else %}
-                            <span class="badge bg-danger">Not Available</span>
-                        {% endif %}
-                    </p>
+                        <div class="col-md-6 mb-3">
+                            <small class="text-muted">Phone</small>
+                            <h6 class="fw-bold">
+                                {{ provider.phone_number }}
+                            </h6>
+                        </div>
 
-                    <div class="mt-4">
-                        <a href="#" class="btn btn-primary">
+                    </div>
+
+                    <!-- Buttons -->
+                    <div class="d-flex flex-wrap gap-3 mt-3">
+
+                        <a href="#" class="btn btn-primary px-4">
                             Book Service
                         </a>
 
-                        <a href="{% url 'customer_service_post_page' %}"
-                           class="btn btn-outline-secondary">
-                            Back
+                        <a href="{% url 'customer_service_post_page' %}" class="btn btn-outline-secondary px-4">
+                            Back to Services
                         </a>
+
                     </div>
 
                 </div>
@@ -81,7 +101,51 @@
             </div>
 
         </div>
+
     </div>
 
+    <!-- MAP SECTION -->
+    {% if provider.latitude and provider.longitude %}
+    <div class="card shadow-sm border-0 rounded-4 mt-5">
+        <div class="card-body">
+
+            <h5 class="fw-semibold mb-3">
+                Service Location
+            </h5>
+
+            <div id="map" style="width:100%;height:400px;border-radius:15px;">
+            </div>
+
+        </div>
+    </div>
+    {% endif %}
+
 </div>
+
+
+<!-- LEAFLET MAP (FREE) -->
+{% if provider.latitude and provider.longitude %}
+
+<link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
+
+<script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+
+<script>
+    var latitude = parseFloat("{{ provider.latitude }}");
+    var longitude = parseFloat("{{ provider.longitude }}");
+
+    var map = L.map('map').setView([latitude, longitude], 14);
+
+    L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+        attribution: '&copy; OpenStreetMap contributors'
+    }).addTo(map);
+
+    L.marker([latitude, longitude])
+        .addTo(map)
+        .bindPopup("<b>{{ provider.full_name }}</b><br>{{ provider.location }}")
+        .openPopup();
+</script>
+
+{% endif %}
+
 {% endblock %}

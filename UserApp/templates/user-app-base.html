@@ -31,6 +31,10 @@
     <!-- Template Stylesheet -->
     <link href="{% static 'user_app_assets/css/style.css' %}" rel="stylesheet">
 
+    <!-- map -->
+    <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
+
+
 </head>
 
 <body>
@@ -96,7 +100,8 @@
                         <a href="#" class="nav-item nav-link">Contact</a>
                         {% if request.session.username %}
                         <div class="nav-item dropdown">
-                            <a href="#" class="nav-link dropdown-toggle" data-bs-toggle="dropdown">{{ request.session.username }}</a>
+                            <a href="#" class="nav-link dropdown-toggle" data-bs-toggle="dropdown">{{
+                                request.session.username }}</a>
                             <div class="dropdown-menu bg-light rounded-0 rounded-bottom m-0">
                                 {% if request.session.user_role == 'CUSTOMER' %}
                                 <a href="{% url 'customer_dashboard' %}" class="dropdown-item">Dashboard</a>
