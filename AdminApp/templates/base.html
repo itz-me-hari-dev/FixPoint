@@ -181,11 +181,44 @@
                             <h6 class="p-3 mb-0 text-center">See all notifications</h6>
                         </div>
                     </li>
-                    <li class="nav-item nav-logout d-none d-lg-block">
-                        <a class="nav-link" href="#">
-                            <i class="mdi mdi-power"></i>
+                    
+                    {% if request.user.is_authenticated and request.user.is_superuser %}
+
+                    <li class="nav-item nav-profile dropdown">
+                        <a class="nav-link dropdown-toggle" id="profileDropdown" href="#" data-bs-toggle="dropdown"
+                            aria-expanded="false">
+
+                            <i class="mdi mdi-account-circle mdi-24px"></i>
+                            <span class="ms-2">{{ request.user.username }}</span>
+                        </a>
+
+                        <div class="dropdown-menu dropdown-menu-end navbar-dropdown" aria-labelledby="profileDropdown">
+
+                            <span class="dropdown-item-text">
+                                <strong>{{ request.user.username }}</strong><br>
+                                {{ request.user.email }}
+                            </span>
+
+                            <div class="dropdown-divider"></div>
+
+                            <a class="dropdown-item" href="{% url 'admin_logout' %}">
+                                <i class="mdi mdi-logout me-2 text-danger"></i> Logout
+                            </a>
+
+                        </div>
+                    </li>
+
+                    {% else %}
+
+                    <li class="nav-item">
+                        <a class="nav-link" href="{% url 'admin_login' %}">
+                            <i class="mdi mdi-login"></i>
+                            <span class="ms-1">Login</span>
                         </a>
                     </li>
+
+                    {% endif %}
+
                     <li class="nav-item nav-settings d-none d-lg-block">
                         <a class="nav-link" href="#">
                             <i class="mdi mdi-format-line-spacing"></i>
@@ -228,21 +261,46 @@
                     <li class="nav-item">
                         <a class="nav-link" data-bs-toggle="collapse" href="#category-dropdown" aria-expanded="false"
                             aria-controls="ui-basic">
-                        <span class="menu-title">Service Categories</span>
+                            <span class="menu-title">Service Categories</span>
                             <i class="menu-arrow"></i>
                             <i class="mdi mdi-account-wrench menu-icon"></i>
                         </a>
                         <div class="collapse" id="category-dropdown">
                             <ul class="nav flex-column sub-menu">
                                 <li class="nav-item">
-                                    <a class="nav-link" href="{% url 'add_service_category_form_page' %}">Add Service Category</a>
+                                    <a class="nav-link" href="{% url 'add_service_category_form_page' %}">Add Service
+                                        Category</a>
                                 </li>
                                 <li class="nav-item">
-                                    <a class="nav-link" href="{% url 'display_service_categories_page' %}">Display Service Categories</a>
+                                    <a class="nav-link" href="{% url 'display_service_categories_page' %}">Display
+                                        Service Categories</a>
                                 </li>
                             </ul>
                         </div>
                     </li>
+                    <li class="nav-item">
+                        <a class="nav-link" data-bs-toggle="collapse" href="#provider-dropdown" aria-expanded="false"
+                            aria-controls="provider-dropdown">
+
+                            <span class="menu-title">Service Providers</span>
+                            <i class="menu-arrow"></i>
+                            <i class="mdi mdi-account-group menu-icon"></i>
+
+                        </a>
+
+                        <div class="collapse" id="provider-dropdown">
+                            <ul class="nav flex-column sub-menu">
+
+                                <li class="nav-item">
+                                    <a class="nav-link" href="{% url 'display_service_providers_page' %}">
+                                        Display Service Providers
+                                    </a>
+                                </li>
+
+                            </ul>
+                        </div>
+                    </li>
+
                     <!-- <li class="nav-item">
                         <a class="nav-link" data-bs-toggle="collapse" href="#icons" aria-expanded="false"
                             aria-controls="icons">

@@ -123,7 +123,6 @@ def service_provider_dashboard(request):
 
     return render(request, "service-provider-dashboard.html", context)
 
-
 def manage_service_provider_profile(request):
 
     if not request.session.get("username"):

@@ -1,0 +1,117 @@
+{% extends 'base.html' %}
+{% block title %}Service Provider Approvals{% endblock %}
+
+{% block content %}
+
+<div class="content-wrapper">
+
+    <div class="row">
+        <div class="col-12">
+            <h3 class="mb-4 font-weight-bold">Service Provider Approvals</h3>
+        </div>
+    </div>
+
+    <!-- Success / Error Messages -->
+    {% if messages %}
+    {% for message in messages %}
+    <div class="alert alert-{{ message.tags }} alert-dismissible fade show">
+        {{ message }}
+        <button type="button" class="close" data-dismiss="alert">&times;</button>
+    </div>
+    {% endfor %}
+    {% endif %}
+
+    <div class="card">
+        <div class="card-body">
+
+            <table class="table table-hover">
+                <thead>
+                    <tr>
+                        <th>ID</th>
+                        <th>Photo</th>
+                        <th>Name</th>
+                        <th>Email</th>
+                        <th>Phone</th>
+                        <th>Service</th>
+                        <th>Experience</th>
+                        <th>Rate</th>
+                        <th>Location</th>
+                        <th>Status</th>
+                        <th>Actions</th>
+                    </tr>
+                </thead>
+
+                <tbody>
+                    {% for provider in providers %}
+                    <tr>
+
+                        <td>{{ provider.id }}</td>
+
+                        <!-- Profile Photo -->
+                        <td>
+                            {% if provider.profile_photo %}
+                            <img src="{{ provider.profile_photo.url }}"
+                                style="width:50px;height:50px;object-fit:cover;border-radius:6px;">
+                            {% else %}
+                            <span class="text-muted">No Photo</span>
+                            {% endif %}
+                        </td>
+
+                        <td>{{ provider.full_name }}</td>
+                        <td>{{ provider.user.email }}</td>
+                        <td>{{ provider.phone_number }}</td>
+                        <td>{{ provider.service_type }}</td>
+                        <td>{{ provider.experience }} yrs</td>
+                        <td>₹{{ provider.hourly_rate }}</td>
+                        <td>{{ provider.location }}</td>
+
+                        <!-- Approval Status -->
+                        <td>
+                            {% if provider.approval_status == "APPROVED" %}
+                            <span class="badge badge-success">Approved</span>
+                            {% elif provider.approval_status == "REJECTED" %}
+                            <span class="badge badge-danger">Rejected</span>
+                            {% else %}
+                            <span class="badge badge-warning">Pending</span>
+                            {% endif %}
+                        </td>
+
+                        <!-- Action Buttons -->
+                        <td>
+                            <div class="d-flex flex-column">
+
+                                {% if provider.approval_status != "APPROVED" %}
+                                <a href="{% url 'approve_provider' provider.id %}"
+                                    class="btn btn-sm btn-outline-success mb-1">
+                                    Approve
+                                </a>
+                                {% endif %}
+
+                                {% if provider.approval_status != "REJECTED" %}
+                                <a href="{% url 'reject_provider' provider.id %}" class="btn btn-sm btn-outline-danger">
+                                    Reject
+                                </a>
+                                {% endif %}
+
+                            </div>
+                        </td>
+
+                    </tr>
+
+                    {% empty %}
+                    <tr>
+                        <td colspan="11" class="text-center text-muted">
+                            No service providers found
+                        </td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+
+            </table>
+
+        </div>
+    </div>
+
+</div>
+
+{% endblock %}

@@ -10,7 +10,10 @@ urlpatterns = [
     path('update_service_category/<int:category_id>/',views.update_service_category,name="update_service_category"),
     path('delete_service_category/<int:category_id>/',views.delete_service_category,name="delete_service_category"),
 
-
+    path('display_service_providers_page/', views.display_service_providers_page, name='display_service_providers_page'),
+    path('approve_provider/<int:provider_id>/',views.approve_provider,name='approve_provider'),
+    path('reject_provider/<int:provider_id>/',views.reject_provider,name='reject_provider'),
 
     path('admin_login/',views.admin_login,name="admin_login"),
+    path('admin_logout/',views.admin_logout,name="admin_logout"),
 ]
