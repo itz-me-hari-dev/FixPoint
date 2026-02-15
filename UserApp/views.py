@@ -1,10 +1,12 @@
 from django.shortcuts import render,redirect, get_object_or_404
 from django.utils.datastructures import MultiValueDictKeyError
 from django.core.files.storage import FileSystemStorage
-from UserApp.models import UserDb,ServiceProviderProfileDb,CustomerProfileDb
+from UserApp.models import UserDb,ServiceProviderProfileDb,CustomerProfileDb,ServiceBookingDb
 from AdminApp.models import ServiceCategoryDb
+from django.utils import timezone
 from django.contrib import messages
 from decimal import Decimal
+import math
 
 
 # Create your views here.
@@ -98,22 +100,29 @@ def user_logout(request):
 def service_provider_dashboard(request):
 
     if not request.session.get("username"):
-        return redirect("user_login")
+        return redirect("user_authentication")
 
     user = UserDb.objects.get(username=request.session["username"])
-    service_categories = ServiceCategoryDb.objects.all()
 
     try:
         profile = ServiceProviderProfileDb.objects.get(user=user)
     except ServiceProviderProfileDb.DoesNotExist:
         profile = None
 
+    bookings = ServiceBookingDb.objects.filter(
+        service_provider=profile
+    ).order_by("-booking_date")
+
+    service_categories = ServiceCategoryDb.objects.all()
+
     context = {
         "profile": profile,
-        "service_categories":service_categories
+        "service_categories": service_categories,
+        "bookings": bookings
     }
 
     return render(request, "service-provider-dashboard.html", context)
+
 
 def manage_service_provider_profile(request):
 
@@ -238,57 +247,179 @@ def manage_customer_profile(request):
 
     return redirect("customer_dashboard")
 
+def calculate_distance(lat1, lon1, lat2, lon2):
+    R = 6371
+    d_lat = math.radians(lat2 - lat1)
+    d_lon = math.radians(lon2 - lon1)
+
+    a = (math.sin(d_lat/2) ** 2 +
+         math.cos(math.radians(lat1)) *
+         math.cos(math.radians(lat2)) *
+         math.sin(d_lon/2) ** 2)
+
+    c = 2 * math.atan2(math.sqrt(a), math.sqrt(1 - a))
+    return round(R * c, 2)
+
 def customer_service_post_page(request):
+
+    if not request.session.get("username"):
+        return redirect("user_authentication")
+
+    user = UserDb.objects.get(username=request.session["username"])
+    customer_profile = CustomerProfileDb.objects.get(user=user)
 
     service_categories = ServiceCategoryDb.objects.all()
     service_post = ServiceProviderProfileDb.objects.filter(is_available=True)
 
-    selected_category = request.GET.get("category")
-    location = request.GET.get("location")
+    # Calculate distance
+    for provider in service_post:
+        if (provider.latitude and provider.longitude and
+            customer_profile.latitude and customer_profile.longitude):
 
-    # Category filter
-    if selected_category:
-        category_obj = ServiceCategoryDb.objects.get(id=selected_category)
-        service_post = service_post.filter(
-            service_type=category_obj.category_name
-        )
-
-    # Location filter
-    if location:
-        service_post = service_post.filter(
-            location__icontains=location
-        )
+            provider.distance = calculate_distance(
+                float(customer_profile.latitude),
+                float(customer_profile.longitude),
+                float(provider.latitude),
+                float(provider.longitude)
+            )
+        else:
+            provider.distance = None
 
     context = {
         "service_categories": service_categories,
         "service_post": service_post,
-        "selected_category": selected_category,
     }
 
     return render(request, "customer-service-post-page.html", context)
 
 def provider_profile_view(request, provider_id):
 
-    provider = get_object_or_404(
-        ServiceProviderProfileDb,
-        id=provider_id,
-        is_available=True,
-        # approval_status="APPROVED"
-    )
+    if not request.session.get("username"):
+        return redirect("user_authentication")
+
+    user = UserDb.objects.get(username=request.session["username"])
+    customer_profile = CustomerProfileDb.objects.get(user=user)
+
+    provider = get_object_or_404(ServiceProviderProfileDb, id=provider_id)
+
+    distance = None
+
+    if (provider.latitude and provider.longitude and
+        customer_profile.latitude and customer_profile.longitude):
+
+        distance = calculate_distance(
+            float(customer_profile.latitude),
+            float(customer_profile.longitude),
+            float(provider.latitude),
+            float(provider.longitude)
+        )
 
     context = {
-        "provider": provider
+        "provider": provider,
+        "distance": distance
     }
 
-    return render(
-        request,
-        "provider-profile-view.html",
-        context
+    return render(request, "provider-profile-view.html", context)
+
+def provider_start_job(request, booking_id):
+
+    if not request.session.get("username"):
+        return redirect("user_authentication")
+
+    user = UserDb.objects.get(username=request.session["username"])
+    provider_profile = get_object_or_404(ServiceProviderProfileDb, user=user)
+
+    booking = get_object_or_404(
+        ServiceBookingDb,
+        id=booking_id,
+        service_provider=provider_profile
     )
 
+    # Prevent double start
+    if booking.status != "ACCEPTED":
+        messages.error(request, "Job cannot be started.")
+        return redirect("service_provider_dashboard")
 
+    booking.start_time = timezone.now()
+    booking.status = "IN_PROGRESS"
+    booking.save()
 
+    messages.success(request, "Job started successfully.")
 
+    return redirect("service_provider_dashboard")
+
+def provider_stop_job(request, booking_id):
+
+    if not request.session.get("username"):
+        return redirect("user_authentication")
+
+    user = UserDb.objects.get(username=request.session["username"])
+    provider_profile = get_object_or_404(ServiceProviderProfileDb, user=user)
+
+    booking = get_object_or_404(
+        ServiceBookingDb,
+        id=booking_id,
+        service_provider=provider_profile
+    )
+
+    # Prevent stopping wrong status
+    if booking.status != "IN_PROGRESS":
+        messages.error(request, "Job is not in progress.")
+        return redirect("service_provider_dashboard")
+
+    if not booking.start_time:
+        messages.error(request, "Start time not found.")
+        return redirect("service_provider_dashboard")
+
+    booking.end_time = timezone.now()
+
+    duration = booking.end_time - booking.start_time
+    total_hours = Decimal(duration.total_seconds()) / Decimal(3600)
+
+    booking.total_time = round(float(total_hours), 2)
+
+    booking.total_amount = (
+        total_hours * booking.service_provider.hourly_rate
+    ).quantize(Decimal("0.01"))
+
+    booking.status = "COMPLETED"
+    booking.save()
+
+    messages.success(request, "Job completed successfully.")
+
+    return redirect("service_provider_dashboard")
+
+def create_booking(request, provider_id):
+
+    if not request.session.get("username"):
+        return redirect("user_authentication")
+
+    user = UserDb.objects.get(username=request.session["username"])
+    customer_profile = CustomerProfileDb.objects.get(user=user)
+
+    provider = get_object_or_404(ServiceProviderProfileDb, id=provider_id)
+
+    ServiceBookingDb.objects.create(
+        customer=customer_profile,
+        service_provider=provider,
+        service_type=provider.service_type,
+        status="PENDING"
+    )
+
+    messages.success(request, "Booking request sent successfully.")
+    return redirect("customer_dashboard")
+
+def accept_booking(request, booking_id):
+    booking = get_object_or_404(ServiceBookingDb, id=booking_id)
+    booking.status = "ACCEPTED"
+    booking.save()
+    return redirect("service_provider_dashboard")
+
+def reject_booking(request, booking_id):
+    booking = get_object_or_404(ServiceBookingDb, id=booking_id)
+    booking.status = "CANCELLED"
+    booking.save()
+    return redirect("service_provider_dashboard")
 
 
 

@@ -72,7 +72,15 @@
                             <h6 class="fw-bold">
                                 {{ provider.location }}
                             </h6>
+
+                            {% if distance %}
+                            <small class="text-primary">
+                                <i class="fa fa-route me-1"></i>
+                                {{ distance }} km away from you
+                            </small>
+                            {% endif %}
                         </div>
+
 
                         <div class="col-md-6 mb-3">
                             <small class="text-muted">Phone</small>
@@ -86,9 +94,13 @@
                     <!-- Buttons -->
                     <div class="d-flex flex-wrap gap-3 mt-3">
 
-                        <a href="#" class="btn btn-primary px-4">
-                            Book Service
-                        </a>
+                        <form method="post" action="{% url 'create_booking' provider.id %}">
+                            {% csrf_token %}
+                            <button type="submit" class="btn btn-primary">
+                                Book Now
+                            </button>
+                        </form>
+
 
                         <a href="{% url 'customer_service_post_page' %}" class="btn btn-outline-secondary px-4">
                             Back to Services

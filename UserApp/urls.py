@@ -14,6 +14,11 @@ urlpatterns = [
     path("customer_service_post_page", views.customer_service_post_page, name="customer_service_post_page"),
     path('toggle_availability/', views.toggle_availability, name='toggle_availability'),
     path('provider_profile_view/<int:provider_id>/', views.provider_profile_view, name='provider_profile_view'),
+    path('provider_start_job/<int:booking_id>/', views.provider_start_job, name="provider_start_job"),
+    path('provider_stop_job/<int:booking_id>/', views.provider_stop_job, name="provider_stop_job"),
+    path('create_booking/<int:provider_id>/', views.create_booking, name="create_booking"),
+    path('accept_booking/<int:booking_id>/', views.accept_booking, name="accept_booking"),
+    path('reject_booking/<int:booking_id>/', views.reject_booking, name="reject_booking"),
 
 
 ]

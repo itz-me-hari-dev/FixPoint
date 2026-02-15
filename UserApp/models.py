@@ -1,5 +1,4 @@
 from django.db import models
-
 # Create your models here.
 
 class UserDb(models.Model):
@@ -100,3 +99,50 @@ class CustomerProfileDb(models.Model):
 
     def __str__(self):
         return f"{self.full_name} (Customer)"
+
+
+class ServiceBookingDb(models.Model):
+
+    STATUS_CHOICES = (
+        ('PENDING', 'Pending'),
+        ('ACCEPTED', 'Accepted'),
+        ('IN_PROGRESS', 'In Progress'),
+        ('COMPLETED', 'Completed'),
+        ('CANCELLED', 'Cancelled'),
+    )
+
+    customer = models.ForeignKey(
+        CustomerProfileDb,
+        on_delete=models.CASCADE,
+        related_name="customer_bookings"
+    )
+
+    service_provider = models.ForeignKey(
+        ServiceProviderProfileDb,
+        on_delete=models.CASCADE,
+        related_name="provider_bookings"
+    )
+
+    service_type = models.CharField(max_length=100)
+
+    booking_date = models.DateTimeField(auto_now_add=True)
+
+    start_time = models.DateTimeField(null=True, blank=True)
+    end_time = models.DateTimeField(null=True, blank=True)
+
+    total_time = models.FloatField(null=True, blank=True)
+    total_amount = models.DecimalField(
+        max_digits=10,
+        decimal_places=2,
+        null=True,
+        blank=True
+    )
+
+    status = models.CharField(
+        max_length=20,
+        choices=STATUS_CHOICES,
+        default='PENDING'
+    )
+
+    def __str__(self):
+        return f"{self.customer.full_name} → {self.service_provider.full_name}"

@@ -343,11 +343,10 @@
                                         <option value="">Select Service</option>
 
                                         {% for category in service_categories %}
-                                        <option value="{{ category.category_name }}" 
-                                        {% if profile and profile.service_type == category.category_name %}
-                                            selected 
-                                        {% endif %}>
-                                            {{ category.category_name }}
+                                        <option value="{{ category.category_name }}"
+                                        {% if profile and profile.service_type == category.category_name %} 
+                                            selected
+                                        {% endif %}> {{ category.category_name }} 
                                         </option>
                                         {% endfor %}
                                     </select>
@@ -422,71 +421,152 @@
                 </div>
             </div>
 
-            <!-- WORK SESSION -->
+            <!-- WORK SECTION -->
             <div id="work" class="section d-none">
 
-                <!-- STATUS BANNER -->
-                <div class="alert alert-secondary mb-4">
-                    <i class="fa fa-info-circle me-2"></i>
-                    Start a job when you arrive at the customer location.
+                <div class="p-4">
+
+                    {% for booking in bookings %}
+
+                        {% if booking.status == "IN_PROGRESS" %}
+
+                            <!-- LIVE JOB MODE -->
+                            <div class="bg-dark text-white rounded shadow-lg p-5 text-center">
+
+                                <div class="mb-3">
+                                    <span class="badge bg-danger px-4 py-2 fs-6">
+                                        JOB RUNNING
+                                    </span>
+                                </div>
+
+                                <h4 class="mb-2">{{ booking.service_type }}</h4>
+                                <p class="text-light">
+                                    Customer: {{ booking.customer.full_name }}
+                                </p>
+
+                                <hr class="bg-light">
+
+                                <!-- LIVE TIMER -->
+                                <div id="liveTimer"
+                                    data-start-time="{{ booking.start_time|date:'c' }}"
+                                    data-hourly-rate="{{ booking.service_provider.hourly_rate }}">
+
+                                    <div class="my-4">
+
+                                        <!-- TIME -->
+                                        <div class="mb-3">
+                                            <small class="text-light d-block">Elapsed Time</small>
+                                            <h1 class="display-5 fw-bold text-white" id="timerDisplay">
+                                                00:00:00
+                                            </h1>
+                                        </div>
+
+                                        <!-- AMOUNT -->
+                                        <div>
+                                            <small class="text-light d-block">Current Earnings</small>
+                                            <h3 class="fw-bold text-warning" id="earningsDisplay">
+                                                ₹ 0.00
+                                            </h3>
+                                        </div>
+
+                                    </div>
+
+                                    <p class="mt-2 text-light">
+                                        ₹ {{ booking.service_provider.hourly_rate }} / hour
+                                    </p>
+
+                                </div>
+
+                                <div class="mt-5">
+                                    <a href="{% url 'provider_stop_job' booking.id %}"
+                                    class="btn btn-danger btn-lg px-5">
+                                        <i class="fa fa-stop me-2"></i>
+                                        Stop Job
+                                    </a>
+                                </div>
+
+                            </div>
+
+                        {% endif %}
+
+                    {% endfor %}
+
+                    <!-- NON-RUNNING JOBS -->
+
+                    {% for booking in bookings %}
+
+                        {% if booking.status == "PENDING" or booking.status == "ACCEPTED" %}
+
+                            <div class="card border-0 shadow-sm mb-4">
+                                <div class="card-body">
+
+                                    <div class="d-flex justify-content-between align-items-center">
+                                        <div>
+                                            <h5>{{ booking.service_type }}</h5>
+                                            <small class="text-muted">
+                                                {{ booking.customer.full_name }}
+                                            </small>
+                                        </div>
+
+                                        <span class="badge
+                                            {% if booking.status == 'PENDING' %}bg-secondary
+                                            {% elif booking.status == 'ACCEPTED' %}bg-warning
+                                            {% endif %}">
+                                            {{ booking.status }}
+                                        </span>
+                                    </div>
+
+                                    <p class="mt-3 mb-2">
+                                        <strong>Hourly Rate:</strong>
+                                        ₹ {{ booking.service_provider.hourly_rate }}
+                                    </p>
+
+                                    {% if booking.customer.latitude and booking.customer.longitude %}
+                                    <a target="_blank"
+                                    href="https://www.google.com/maps?q={{ booking.customer.latitude }},{{ booking.customer.longitude }}"
+                                    class="btn btn-outline-primary btn-sm mb-3">
+                                        Open Location
+                                    </a>
+                                    {% endif %}
+
+                                    <div>
+
+                                        {% if booking.status == "PENDING" %}
+                                            <a href="{% url 'accept_booking' booking.id %}"
+                                            class="btn btn-success me-2">
+                                                Accept
+                                            </a>
+
+                                            <a href="{% url 'reject_booking' booking.id %}"
+                                            class="btn btn-outline-danger">
+                                                Reject
+                                            </a>
+                                        {% endif %}
+
+                                        {% if booking.status == "ACCEPTED" %}
+                                            <a href="{% url 'provider_start_job' booking.id %}"
+                                            class="btn btn-success">
+                                                Start Job
+                                            </a>
+                                        {% endif %}
+
+                                    </div>
+
+                                </div>
+                            </div>
+
+                        {% endif %}
+
+                    {% empty %}
+                        <p class="text-muted text-center">
+                            No jobs available.
+                        </p>
+                    {% endfor %}
+
                 </div>
 
-                <div class="bg-light rounded shadow p-4">
-
-                    <h5 class="mb-4">
-                        <i class="fa fa-briefcase me-2 text-primary"></i>
-                        Work Session
-                    </h5>
-
-                    <!-- JOB METRICS -->
-                    <div class="row g-4 mb-4">
-
-                        <!-- TIMER -->
-                        <div class="col-md-4">
-                            <div class="text-center border rounded p-3 h-100">
-                                <i class="fa fa-clock fa-2x text-secondary mb-2"></i>
-                                <p class="mb-1">Job Time</p>
-                                <h3 id="timer">00:00:00</h3>
-                            </div>
-                        </div>
-
-                        <!-- HOURLY RATE -->
-                        <div class="col-md-4">
-                            <div class="text-center border rounded p-3 h-100">
-                                <i class="fa fa-hourglass-half fa-2x text-secondary mb-2"></i>
-                                <p class="mb-1">Hourly Rate</p>
-                                <h3 class="text-primary">₹ <span id="hourlyRateView">0</span></h3>
-                            </div>
-                        </div>
-
-                        <!-- TOTAL WAGE -->
-                        <div class="col-md-4">
-                            <div class="text-center border rounded p-3 h-100">
-                                <i class="fa fa-wallet fa-2x text-primary mb-2"></i>
-                                <p class="mb-1">Current Wage</p>
-                                <h3 class="text-primary">₹ <span id="wage">0</span></h3>
-                            </div>
-                        </div>
-
-                    </div>
-
-                    <!-- JOB CONTROLS -->
-                    <div class="d-flex gap-3">
-
-                        <button class="btn btn-success flex-fill" onclick="startJob()">
-                            <i class="fa fa-play me-2"></i>
-                            Start Job
-                        </button>
-
-                        <button class="btn btn-danger flex-fill" onclick="stopJob()">
-                            <i class="fa fa-stop me-2"></i>
-                            Stop Job
-                        </button>
-
-                    </div>
-
-                </div>
             </div>
+
 
             <!-- JOB HISTORY -->
             <div id="history" class="section d-none">
@@ -714,6 +794,9 @@
 <script>
     function showSection(sectionId, el) {
 
+        // SAVE ACTIVE SECTION
+        localStorage.setItem("activeSection", sectionId);
+
         // hide all sections
         document.querySelectorAll('.section').forEach(sec => {
             sec.classList.add('d-none');
@@ -739,10 +822,23 @@
 
 <script>
     document.addEventListener("DOMContentLoaded", function () {
-        const firstLink = document.querySelector('.nav-link');
-        showSection('dashboard', firstLink);
+
+        const savedSection = localStorage.getItem("activeSection") || "dashboard";
+
+        const navLinks = document.querySelectorAll('.nav-link');
+
+        let targetLink = null;
+
+        navLinks.forEach(link => {
+            if (link.getAttribute("onclick")?.includes(savedSection)) {
+                targetLink = link;
+            }
+        });
+
+        showSection(savedSection, targetLink);
     });
 </script>
+
 
 <script>
     function previewPhoto(event) {
@@ -755,6 +851,40 @@
         };
         reader.readAsDataURL(file);
     }
+</script>
+
+<script>
+document.addEventListener("DOMContentLoaded", function () {
+
+    const timerBlock = document.getElementById("liveTimer");
+    if (!timerBlock) return;
+
+    const startTime = new Date(timerBlock.dataset.startTime);
+    const hourlyRate = parseFloat(timerBlock.dataset.hourlyRate);
+
+    const timerDisplay = document.getElementById("timerDisplay");
+    const earningsDisplay = document.getElementById("earningsDisplay");
+
+    function updateTimer() {
+        const now = new Date();
+        const diffSeconds = Math.floor((now - startTime) / 1000);
+
+        const hours = Math.floor(diffSeconds / 3600);
+        const minutes = Math.floor((diffSeconds % 3600) / 60);
+        const seconds = diffSeconds % 60;
+
+        timerDisplay.innerText =
+            String(hours).padStart(2, '0') + ":" +
+            String(minutes).padStart(2, '0') + ":" +
+            String(seconds).padStart(2, '0');
+
+        const earnings = (diffSeconds / 3600) * hourlyRate;
+        earningsDisplay.innerText = "₹ " + earnings.toFixed(2);
+    }
+
+    updateTimer();
+    setInterval(updateTimer, 1000);
+});
 </script>
 
 

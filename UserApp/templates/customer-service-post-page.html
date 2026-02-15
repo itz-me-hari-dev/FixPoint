@@ -20,7 +20,7 @@
                 <option value="{{ category.id }}" 
                 {% if selected_category == category.id|stringformat:"s" %} 
                     selected 
-                {% endif %} >{{ category.category_name }} </option>
+                {% endif %}>{{ category.category_name }} </option>
                 {% endfor %}
             </select>
         </div>
@@ -82,6 +82,13 @@
                     {{ post.location }}
                 </p>
 
+                {% if post.distance %}
+                <p class="mb-1 text-primary">
+                    <i class="fa fa-route me-1"></i>
+                    {{ post.distance }} km away
+                </p>
+                {% endif %}
+
                 <p class="mb-1">
                     <i class="fa fa-phone me-1 text-muted"></i>
                     {{ post.phone_number }}
@@ -92,13 +99,13 @@
                 </p>
 
                 <!-- BUTTON -->
-                <a href="{% url 'provider_profile_view' provider_id=post.id %}" class="btn btn-outline-primary btn-sm w-100">
+                <a href="{% url 'provider_profile_view' provider_id=post.id %}"
+                    class="btn btn-outline-primary btn-sm w-100">
                     View & Book
                 </a>
 
             </div>
         </div>
-
         {% endfor %}
 
 
