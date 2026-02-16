@@ -3,10 +3,11 @@ from django.utils.datastructures import MultiValueDictKeyError
 from django.core.files.storage import FileSystemStorage
 from UserApp.models import UserDb,ServiceProviderProfileDb,CustomerProfileDb,ServiceBookingDb
 from AdminApp.models import ServiceCategoryDb
-from django.utils import timezone
 from django.contrib import messages
 from decimal import Decimal
 import math
+from django.utils import timezone
+from django.db.models import Sum
 
 
 # Create your views here.
@@ -109,16 +110,50 @@ def service_provider_dashboard(request):
     except ServiceProviderProfileDb.DoesNotExist:
         profile = None
 
+    # All bookings
     bookings = ServiceBookingDb.objects.filter(
         service_provider=profile
     ).order_by("-booking_date")
 
+    # Active Job
+    active_job = ServiceBookingDb.objects.filter(
+        service_provider=profile,
+        status="IN_PROGRESS"
+    ).first()
+
+    #Today Earnings
+    today = timezone.now().date()
+
+    today_earnings = ServiceBookingDb.objects.filter(
+        service_provider=profile,
+        status="COMPLETED",
+        booking_date__date=today
+    ).aggregate(total=Sum("total_amount"))["total"] or 0
+
+    #Last Completed Job
+    last_job = ServiceBookingDb.objects.filter(
+        service_provider=profile,
+        status="COMPLETED"
+    ).order_by("-booking_date").first()
+
+    #Total Hours Today
+    total_hours_today = ServiceBookingDb.objects.filter(
+        service_provider=profile,
+        status="COMPLETED",
+        booking_date__date=today
+    ).aggregate(total=Sum("total_time"))["total"] or 0
+
+    # Service Category
     service_categories = ServiceCategoryDb.objects.all()
 
     context = {
         "profile": profile,
-        "service_categories": service_categories,
-        "bookings": bookings
+        "bookings": bookings,
+        "active_job": active_job,
+        "today_earnings": today_earnings,
+        "last_job": last_job,
+        "total_hours_today": total_hours_today,
+        "service_categories":service_categories,
     }
 
     return render(request, "service-provider-dashboard.html", context)
@@ -206,9 +241,29 @@ def customer_dashboard(request):
     except CustomerProfileDb.DoesNotExist:
         profile = None
 
+    # 🔹 Default values (safe fallback)
+    total_bookings = 0
+    total_spent = 0
+
+    if profile:
+        # Total Bookings
+        total_bookings = ServiceBookingDb.objects.filter(
+            customer=profile
+        ).count()
+
+        # Total Spent (only completed bookings)
+        total_spent = ServiceBookingDb.objects.filter(
+            customer=profile,
+            status="COMPLETED"
+        ).aggregate(
+            total=Sum("total_amount")
+        )["total"] or 0
+
     context = {
         "profile": profile,
-        "user":user
+        "user": user,
+        "total_bookings": total_bookings,
+        "total_spent": total_spent,
     }
 
     return render(request, "customer-dashboard.html", context)
@@ -268,9 +323,25 @@ def customer_service_post_page(request):
     customer_profile = CustomerProfileDb.objects.get(user=user)
 
     service_categories = ServiceCategoryDb.objects.all()
-    service_post = ServiceProviderProfileDb.objects.filter(is_available=True)
 
-    # Calculate distance
+    # Base queryset
+    service_post = ServiceProviderProfileDb.objects.filter(
+        is_available=True,
+        approval_status="APPROVED"
+    )
+
+    #Get selected category from GET
+    selected_category = request.GET.get("category")
+
+    if selected_category:
+        # Because your service_type is stored as string
+        category_obj = ServiceCategoryDb.objects.filter(id=selected_category).first()
+        if category_obj:
+            service_post = service_post.filter(
+                service_type=category_obj.category_name
+            )
+
+    #Calculate distance
     for provider in service_post:
         if (provider.latitude and provider.longitude and
             customer_profile.latitude and customer_profile.longitude):
@@ -287,6 +358,7 @@ def customer_service_post_page(request):
     context = {
         "service_categories": service_categories,
         "service_post": service_post,
+        "selected_category": selected_category,
     }
 
     return render(request, "customer-service-post-page.html", context)
