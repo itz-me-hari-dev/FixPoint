@@ -16,6 +16,19 @@ def home(request):
     categories = ServiceCategoryDb.objects.all()
     return render(request,"index.html",{"categories":categories})
 
+def about_page(request):
+    return render(request,"about-page.html")
+
+def services_page(request):
+    categories = ServiceCategoryDb.objects.filter(is_active=True)
+    context = {
+        "categories": categories
+    }
+    return render(request, "services-page.html", context)
+
+def contact_page(request):
+    return render(request, "contact-page.html")
+
 def user_authentication(request):
     return render(request,"user-authentication.html")
 

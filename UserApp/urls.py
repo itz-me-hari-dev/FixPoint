@@ -3,6 +3,9 @@ from UserApp import views
 
 urlpatterns = [
     path("",views.home,name="home"),
+    path("about_page",views.about_page,name="about_page"),
+    path("services_page/", views.services_page, name="services_page"),
+    path("contact_page/", views.contact_page, name="contact_page"),
     path("user_authentication/",views.user_authentication,name="user_authentication"),
     path("user_sign_up/",views.user_sign_up,name="user_sign_up"),
     path("user_sign_in/",views.user_sign_in,name="user_sign_in"),

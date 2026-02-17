@@ -1,0 +1,140 @@
+{% extends 'user-app-base.html' %}
+{% load static %}
+{% block title %}About - FixPoint{% endblock %}
+
+{% block content %}
+
+<style>
+    /* ===== Page Header ===== */
+    .page-header {
+        background: linear-gradient(rgba(0, 0, 0, 0.6), rgba(0, 0, 0, 0.6)),
+        url("{% static 'user_app_assets/img/about-banner.png' %}") center center / cover no-repeat;
+        height: 450px;
+
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        text-align: center;
+    }
+
+    .page-header h1,
+    .page-header p {
+        color: #ffffff;
+    }
+
+    /* ===== Section spacing ===== */
+    .section-space {
+        padding: 70px 0;
+    }
+
+    /* ===== Card hover style ===== */
+    .info-box {
+        background: #f8f9fa;
+        border-radius: 12px;
+        padding: 30px 20px;
+        height: 100%;
+        box-shadow: 0 4px 18px rgba(0, 0, 0, 0.06);
+        transition: all 0.3s ease;
+    }
+
+    .info-box:hover {
+        transform: translateY(-6px);
+        box-shadow: 0 8px 28px rgba(0, 0, 0, 0.12);
+    }
+</style>
+
+<!-- ===== Page Header ===== -->
+<div class="container-fluid page-header">
+    <div class="container">
+        <h1 class="display-4 text-uppercase mb-3">About FixPoint</h1>
+        <p class="fs-5">On-Demand Home Service Booking Platform</p>
+    </div>
+</div>
+
+<!-- ===== About Project ===== -->
+<div class="container section-space">
+    <div class="row justify-content-center">
+        <div class="col-lg-10 text-center">
+            <h2 class="text-uppercase mb-4">Smart & Reliable Home Services</h2>
+
+            <p class="mb-4">
+                <strong>FixPoint</strong> connects customers with trusted service
+                providers like plumbers, electricians, painters, and mechanics
+                based on location and availability.
+            </p>
+
+            <p>
+                Customers can search, book services online, and make secure payments.
+                Providers manage bookings while the admin ensures service quality.
+            </p>
+        </div>
+    </div>
+</div>
+
+<!-- ===== How It Works ===== -->
+<div class="container section-space">
+    <div class="text-center mb-5">
+        <h2 class="text-uppercase">How It Works</h2>
+    </div>
+
+    <div class="row g-4">
+        <div class="col-md-4 text-center">
+            <div class="info-box">
+                <i class="fa fa-search fa-3x text-primary mb-3"></i>
+                <h5 class="text-uppercase">Search Services</h5>
+                <p>Find providers by category and location.</p>
+            </div>
+        </div>
+
+        <div class="col-md-4 text-center">
+            <div class="info-box">
+                <i class="fa fa-calendar-check fa-3x text-primary mb-3"></i>
+                <h5 class="text-uppercase">Book Service</h5>
+                <p>Select date and service hours to confirm booking.</p>
+            </div>
+        </div>
+
+        <div class="col-md-4 text-center">
+            <div class="info-box">
+                <i class="fa fa-credit-card fa-3x text-primary mb-3"></i>
+                <h5 class="text-uppercase">Complete & Pay</h5>
+                <p>Service completed with secure online payment.</p>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- ===== Platform Roles ===== -->
+<div class="container section-space">
+    <div class="text-center mb-5">
+        <h2 class="text-uppercase">Platform Roles</h2>
+    </div>
+
+    <div class="row g-4">
+        <div class="col-md-4 text-center">
+            <div class="info-box">
+                <i class="fa fa-users fa-3x text-primary mb-3"></i>
+                <h5 class="text-uppercase">Customers</h5>
+                <p>Search, book, track services, and make payments.</p>
+            </div>
+        </div>
+
+        <div class="col-md-4 text-center">
+            <div class="info-box">
+                <i class="fa fa-user-cog fa-3x text-primary mb-3"></i>
+                <h5 class="text-uppercase">Service Providers</h5>
+                <p>Manage profiles, accept bookings, and complete services.</p>
+            </div>
+        </div>
+
+        <div class="col-md-4 text-center">
+            <div class="info-box">
+                <i class="fa fa-user-shield fa-3x text-primary mb-3"></i>
+                <h5 class="text-uppercase">Admin</h5>
+                <p>Approve providers and monitor the entire platform.</p>
+            </div>
+        </div>
+    </div>
+</div>
+
+{% endblock %}

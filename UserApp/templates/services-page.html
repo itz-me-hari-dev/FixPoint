@@ -1,0 +1,125 @@
+{% extends 'user-app-base.html' %}
+{% load static %}
+{% block title %}Services - FixPoint{% endblock %}
+
+{% block content %}
+
+<style>
+/* ===== Page Header ===== */
+.page-header {
+  background: linear-gradient(rgba(0, 0, 0, 0.6), rgba(0, 0, 0, 0.6)),
+              url("{% static 'user_app_assets/img/services-banner.png' %}")
+              center center / cover no-repeat;
+  height: 450px;
+
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  text-align: center;
+}
+
+.page-header h1,
+.page-header p {
+  color: #ffffff;
+}
+
+/* ===== Service Cards ===== */
+.service-item {
+  background: #ffffff;
+  border-radius: 12px;
+  overflow: hidden;
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.08);
+  transition: transform 0.3s ease, box-shadow 0.3s ease;
+  height: 100%;
+}
+
+.service-item:hover {
+  transform: translateY(-6px);
+  box-shadow: 0 8px 28px rgba(0, 0, 0, 0.12);
+}
+
+.service-item img {
+  height: 200px;
+  object-fit: cover;
+}
+
+.service-text h4 {
+  font-size: 18px;
+  font-weight: 600;
+}
+
+.service-text p {
+  font-size: 14px;
+  color: #6c757d;
+}
+
+.service-btn {
+  margin-top: 15px;
+}
+</style>
+
+<!-- Page Header Start -->
+<div class="container-fluid page-header">
+  <div class="container">
+    <h1 class="display-4 text-uppercase mb-3">Our Services</h1>
+    <p class="fs-5">Professional & Trusted Home Services</p>
+  </div>
+</div>
+<!-- Page Header End -->
+
+<!-- Service Start -->
+<div class="container-fluid service pt-6 pb-6">
+    <div class="container">
+
+        <!-- Section Title -->
+        <div class="text-center mx-auto wow fadeInUp" data-wow-delay="0.1s" style="max-width: 600px;">
+            <h1 class="display-6 text-uppercase mb-5">Our Services</h1>
+        </div>
+
+        <div class="row g-4">
+            {% for category in categories %}
+            <div class="col-lg-3 col-md-6 wow fadeInUp" data-wow-delay="0.1s">
+
+                <div class="service-item">
+                    <div class="service-inner pb-5">
+
+                        <!-- Category Image -->
+                        <img class="img-fluid w-100"
+                             src="{{ category.category_image.url }}"
+                             alt="{{ category.category_name }}"
+                             style="height: 220px; object-fit: cover;">
+
+                        <!-- Category Text -->
+                        <div class="service-text px-5 pt-4">
+                            <h4 class="text-uppercase">{{ category.category_name }}</h4>
+
+                            <div style="min-height: 120px; overflow: hidden;">
+                                <p>
+                                    {{ category.category_description|truncatewords:20 }}
+                                </p>
+                            </div>
+                        </div>
+
+                        <!-- Button (no URL error) -->
+                        <a class="btn btn-light px-3" href="#">
+                            Book Service
+                            <i class="bi bi-chevron-double-right ms-1"></i>
+                        </a>
+
+                    </div>
+                </div>
+
+            </div>
+            {% empty %}
+            <div class="col-12 text-center">
+                <p>No services available at the moment.</p>
+            </div>
+            {% endfor %}
+        </div>
+
+    </div>
+</div>
+<!-- Service End -->
+
+
+{% endblock %}
