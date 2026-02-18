@@ -254,9 +254,10 @@ def customer_dashboard(request):
     except CustomerProfileDb.DoesNotExist:
         profile = None
 
-    # 🔹 Default values (safe fallback)
+    # Default values (safe fallback)
     total_bookings = 0
     total_spent = 0
+    bookings = []
 
     if profile:
         # Total Bookings
@@ -272,11 +273,19 @@ def customer_dashboard(request):
             total=Sum("total_amount")
         )["total"] or 0
 
+        # ADD THIS (Booking History)
+        bookings = ServiceBookingDb.objects.filter(
+            customer=profile
+        ).select_related(
+            "service_provider"
+        ).order_by("-booking_date")
+
     context = {
         "profile": profile,
         "user": user,
         "total_bookings": total_bookings,
         "total_spent": total_spent,
+        "bookings":bookings,
     }
 
     return render(request, "customer-dashboard.html", context)

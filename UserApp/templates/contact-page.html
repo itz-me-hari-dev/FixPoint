@@ -4,55 +4,27 @@
 
 {% block content %}
 
-<!-- Internal CSS -->
 <style>
-    /* Header Background */
     .contact-header {
-        height: 500px;
         background: linear-gradient(rgba(0, 0, 0, 0.6), rgba(0, 0, 0, 0.6)),
-        url("{% static 'user_app_assets/img/contact-banner.png' %}");
-        background-position: center;
-        background-size: cover;
-        background-repeat: no-repeat;
+        url("{% static 'user_app_assets/img/contact-banner.png' %}") center center / cover no-repeat;
+        height: 450px;
+
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        text-align: center;
     }
 
-    /* Section Spacing */
-    .contact-section {
-        padding: 80px 0;
+    .contact-header h1,
+    .contact-header p {
+        color: #ffffff;
     }
 
-    /* Contact Card */
-    .contact-card {
-        border-radius: 10px;
-        transition: 0.3s ease-in-out;
+    .hero-buttons .btn {
+        min-width: 200px;
     }
 
-    .contact-card:hover {
-        transform: translateY(-5px);
-        box-shadow: 0 15px 30px rgba(0, 0, 0, 0.1);
-    }
-
-    /* Contact Info Icons */
-    .contact-info i {
-        font-size: 18px;
-    }
-
-    /* Input Focus */
-    .form-control:focus {
-        box-shadow: none;
-        border-color: #0d6efd;
-    }
-
-    /* Button Hover */
-    .contact-btn {
-        transition: 0.3s;
-    }
-
-    .contact-btn:hover {
-        transform: translateY(-2px);
-    }
-
-    /* Responsive Header */
     @media (max-width: 768px) {
         .contact-header {
             height: 350px;
@@ -60,84 +32,113 @@
     }
 </style>
 
-
-<!-- Page Header -->
-<div class="container-fluid contact-header d-flex align-items-center justify-content-center text-center">
+<!-- Hero Section -->
+<div class="container-fluid contact-header">
     <div class="container">
-        <h1 class="display-4 text-uppercase text-white mb-3">Contact Us</h1>
-        <p class="text-white fs-5">We’d Love to Hear From You</p>
+        <h1 class="display-4 text-uppercase mb-3">Contact Us</h1>
+        <p class="fs-5 mb-4">We’d Love to Hear From You</p>
+
+        <div class="hero-buttons d-flex justify-content-center gap-3 flex-wrap">
+            <button class="btn btn-warning" data-bs-toggle="modal" data-bs-target="#customerModal">
+                Customer Support
+            </button>
+
+            <button class="btn btn-light" data-bs-toggle="modal" data-bs-target="#providerModal">
+                Service Provider Support
+            </button>
+        </div>
     </div>
 </div>
 
 
-<!-- Contact Section -->
-<div class="container contact-section">
-    <div class="row g-5">
+<!-- ================= CUSTOMER MODAL ================= -->
+<div class="modal fade" id="customerModal" tabindex="-1">
+    <div class="modal-dialog modal-lg modal-dialog-centered">
+        <div class="modal-content">
 
-        <!-- Contact Info -->
-        <div class="col-lg-5 contact-info">
-            <h3 class="text-uppercase mb-4">Get In Touch</h3>
-
-            <p>
-                Have questions about our services? Need assistance with booking?
-                Our team is here to help you.
-            </p>
-
-            <div class="mb-3">
-                <i class="fa fa-map-marker-alt text-primary me-2"></i>
-                Kerala, India
+            <div class="modal-header">
+                <h5 class="modal-title">Customer Contact Form</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
             </div>
 
-            <div class="mb-3">
-                <i class="fa fa-phone text-primary me-2"></i>
-                +91 98765 43210
-            </div>
-
-            <div class="mb-3">
-                <i class="fa fa-envelope text-primary me-2"></i>
-                support@fixpoint.com
-            </div>
-        </div>
-
-
-        <!-- Contact Form -->
-        <div class="col-lg-7">
-            <div class="card contact-card shadow-sm border-0 p-4">
-
+            <div class="modal-body">
                 <form method="POST">
                     {% csrf_token %}
+                    <input type="hidden" name="form_type" value="customer">
+
+                    <div class="row g-3">
+                        <div class="col-md-6">
+                            <input type="text" name="cust_name" class="form-control" placeholder="Full Name" required>
+                        </div>
+
+                        <div class="col-md-6">
+                            <input type="email" name="cust_email" class="form-control" placeholder="Email" required>
+                        </div>
+
+                        <div class="col-12">
+                            <textarea name="cust_message" class="form-control" rows="4" placeholder="Your Message"
+                                required></textarea>
+                        </div>
+
+                        <div class="col-12 text-end">
+                            <button type="submit" class="btn btn-warning">
+                                Submit
+                            </button>
+                        </div>
+                    </div>
+
+                </form>
+            </div>
+
+        </div>
+    </div>
+</div>
+
+
+<!-- ================= SERVICE PROVIDER MODAL ================= -->
+<div class="modal fade" id="providerModal" tabindex="-1">
+    <div class="modal-dialog modal-lg modal-dialog-centered">
+        <div class="modal-content">
+
+            <div class="modal-header">
+                <h5 class="modal-title">Service Provider Contact Form</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+            </div>
+
+            <div class="modal-body">
+                <form method="POST">
+                    {% csrf_token %}
+                    <input type="hidden" name="form_type" value="provider">
 
                     <div class="row g-3">
 
                         <div class="col-md-6">
-                            <input type="text" name="name" class="form-control" placeholder="Your Name" required>
+                            <input type="text" name="provider_name" class="form-control" placeholder="Full Name"
+                                required>
                         </div>
 
                         <div class="col-md-6">
-                            <input type="email" name="email" class="form-control" placeholder="Your Email" required>
+                            <input type="email" name="provider_email" class="form-control" placeholder="Email Address"
+                                required>
                         </div>
 
                         <div class="col-12">
-                            <input type="text" name="subject" class="form-control" placeholder="Subject" required>
-                        </div>
-
-                        <div class="col-12">
-                            <textarea name="message" rows="5" class="form-control" placeholder="Your Message"
+                            <textarea name="provider_message" class="form-control" rows="4" placeholder="Your Message"
                                 required></textarea>
                         </div>
 
-                        <div class="col-12">
-                            <button type="submit" class="btn btn-primary px-4 py-2 contact-btn">
+                        <div class="col-12 text-end">
+                            <button type="submit" class="btn btn-primary">
                                 Send Message
                             </button>
                         </div>
 
                     </div>
                 </form>
-
             </div>
-        </div>
 
+
+        </div>
     </div>
 </div>
 
