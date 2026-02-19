@@ -84,9 +84,12 @@
                 </button>
                 <div class="collapse navbar-collapse" id="navbarCollapse">
                     <div class="navbar-nav">
-                        <a href="{% url 'home' %}" class="nav-item nav-link active">Home</a>
-                        <a href="{% url 'about_page' %}" class="nav-item nav-link">About</a>
-                        <a href="{% url 'services_page' %}" class="nav-item nav-link">Services</a>
+                        <a href="{% url 'home' %}" class="nav-item nav-link
+                        {% if request.resolver_match.url_name == 'home' %}active{% endif %}">Home</a>
+                        <a href="{% url 'about_page' %}" class="nav-item nav-link
+                        {% if request.resolver_match.url_name == 'about_page' %}active{% endif %}">About</a>
+                        <a href="{% url 'services_page' %}" class="nav-item nav-link
+                        {% if request.resolver_match.url_name == 'services_page' %}active{% endif %}">Services</a>
                         <!-- <div class="nav-item dropdown">
                             <a href="#" class="nav-link dropdown-toggle" data-bs-toggle="dropdown">Pages</a>
                             <div class="dropdown-menu bg-light rounded-0 rounded-bottom m-0">
@@ -95,10 +98,13 @@
                                 <a href="#" class="dropdown-item">404 Page</a>
                             </div>
                         </div> -->
-                        <a href="{% url 'contact_page' %}" class="nav-item nav-link">Contact</a>
+                        <a href="{% url 'contact_page' %}" class="nav-item nav-link
+                        {% if request.resolver_match.url_name == 'contact_page' %}active{% endif %}">Contact</a>
                         {% if request.session.username %}
                         <div class="nav-item dropdown">
-                            <a href="#" class="nav-link dropdown-toggle" data-bs-toggle="dropdown">
+                            <a href="#" class="nav-link dropdown-toggle
+                            {% if request.resolver_match.url_name == 'customer_dashboard' or request.resolver_match.url_name == 'service_provider_dashboard' %}active{% endif %}" 
+                               data-bs-toggle="dropdown">
                                 {{ request.session.username }}</a>
                             <div class="dropdown-menu bg-light rounded-0 rounded-bottom m-0">
                                 {% if request.session.user_role == 'CUSTOMER' %}

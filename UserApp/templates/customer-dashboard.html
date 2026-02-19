@@ -295,22 +295,65 @@
                             </thead>
 
                             <tbody>
-                                <tr>
-                                    <td>15 Jan 2026</td>
-                                    <td>Plumbing</td>
-                                    <td>Rahul</td>
-                                    <td class="fw-bold text-primary">₹1,200</td>
-                                    <td><span class="badge bg-success">Completed</span></td>
-                                </tr>
 
-                                <tr>
-                                    <td>10 Jan 2026</td>
-                                    <td>Electrical</td>
-                                    <td>Anil</td>
-                                    <td class="fw-bold text-primary">₹850</td>
-                                    <td><span class="badge bg-warning">Pending</span></td>
-                                </tr>
+                            {% for booking in bookings %}
+                            <tr>
+
+                                <!-- Date -->
+                                <td>
+                                    {{ booking.booking_date|date:"d M Y" }}
+                                </td>
+
+                                <!-- Service Type -->
+                                <td>
+                                    {{ booking.service_type }}
+                                </td>
+
+                                <!-- Provider Name -->
+                                <td>
+                                    {{ booking.service_provider.full_name }}
+                                </td>
+
+                                <!-- Amount -->
+                                <td class="fw-bold text-primary">
+                                    {% if booking.total_amount %}
+                                        ₹{{ booking.total_amount }}
+                                    {% else %}
+                                        —
+                                    {% endif %}
+                                </td>
+
+                                <!-- Status Badge -->
+                                <td>
+                                    {% if booking.status == "COMPLETED" %}
+                                        <span class="badge bg-success">Completed</span>
+
+                                    {% elif booking.status == "PENDING" %}
+                                        <span class="badge bg-warning">Pending</span>
+
+                                    {% elif booking.status == "ACCEPTED" %}
+                                        <span class="badge bg-info">Accepted</span>
+
+                                    {% elif booking.status == "IN_PROGRESS" %}
+                                        <span class="badge bg-primary">In Progress</span>
+
+                                    {% else %}
+                                        <span class="badge bg-danger">Cancelled</span>
+                                    {% endif %}
+                                </td>
+
+                            </tr>
+
+                            {% empty %}
+                            <tr>
+                                <td colspan="5" class="text-center text-muted">
+                                    No bookings found.
+                                </td>
+                            </tr>
+                            {% endfor %}
+
                             </tbody>
+
                         </table>
                     </div>
 
