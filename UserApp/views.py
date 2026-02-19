@@ -2,7 +2,7 @@ from django.shortcuts import render,redirect, get_object_or_404
 from django.utils.datastructures import MultiValueDictKeyError
 from django.core.files.storage import FileSystemStorage
 from UserApp.models import UserDb,ServiceProviderProfileDb,CustomerProfileDb,ServiceBookingDb
-from AdminApp.models import ServiceCategoryDb
+from AdminApp.models import *
 from django.contrib import messages
 from decimal import Decimal
 import math
@@ -28,6 +28,34 @@ def services_page(request):
 
 def contact_page(request):
     return render(request, "contact-page.html")
+
+def user_message_save(request):
+
+    if request.method == "POST":
+        form_type = request.POST.get("form_type")
+
+        if request.session.get("username"):
+            user = UserDb.objects.get(username=request.session["username"])
+        else:
+            user = None
+
+        if form_type == "customer":
+            CustomerContactDb.objects.create(
+                user=user,
+                full_name=request.POST.get("cust_name"),
+                email=request.POST.get("cust_email"),
+                message=request.POST.get("cust_message"),
+            )
+
+        elif form_type == "provider":
+            ServiceProviderContactDb.objects.create(
+                user=user,
+                full_name=request.POST.get("provider_name"),
+                email=request.POST.get("provider_email"),
+                message=request.POST.get("provider_message"),
+            )
+
+    return redirect("contact_page")
 
 def user_authentication(request):
     return render(request,"user-authentication.html")

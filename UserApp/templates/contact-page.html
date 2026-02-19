@@ -39,13 +39,15 @@
         <p class="fs-5 mb-4">We’d Love to Hear From You</p>
 
         <div class="hero-buttons d-flex justify-content-center gap-3 flex-wrap">
+            {% if request.session.user_role == 'CUSTOMER' %}
             <button class="btn btn-warning" data-bs-toggle="modal" data-bs-target="#customerModal">
                 Customer Support
             </button>
-
+            {% elif request.session.user_role == 'SERVICE_PROVIDER' %}
             <button class="btn btn-light" data-bs-toggle="modal" data-bs-target="#providerModal">
                 Service Provider Support
             </button>
+            {% endif %}
         </div>
     </div>
 </div>
@@ -62,7 +64,7 @@
             </div>
 
             <div class="modal-body">
-                <form method="POST">
+                <form method="POST" action="{% url 'user_message_save' %}">
                     {% csrf_token %}
                     <input type="hidden" name="form_type" value="customer">
 
@@ -106,7 +108,7 @@
             </div>
 
             <div class="modal-body">
-                <form method="POST">
+                <form method="POST" action="{% url 'user_message_save' %}">
                     {% csrf_token %}
                     <input type="hidden" name="form_type" value="provider">
 

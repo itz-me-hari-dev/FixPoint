@@ -16,4 +16,11 @@ urlpatterns = [
 
     path('admin_login/',views.admin_login,name="admin_login"),
     path('admin_logout/',views.admin_logout,name="admin_logout"),
+
+    path("admin_contact_messages/", views.admin_contact_messages, name="admin_contact_messages"),
+
+    path("delete_customer_message/<int:message_id>/",views.delete_customer_message,name="delete_customer_message"),
+
+    path("delete_provider_message/<int:message_id>/",views.delete_provider_message,name="delete_provider_message"),
+
 ]

@@ -1,0 +1,95 @@
+{% extends 'base.html' %}
+{% load static %}
+{% block title %}FixPoint - Contact Messages{% endblock %}
+
+{% block content %}
+
+<div class="content-wrapper">
+
+    <div class="row">
+        <div class="col-12">
+            <h3 class="mb-4 font-weight-bold">Contact Messages</h3>
+        </div>
+    </div>
+
+    <div class="card">
+        <div class="card-body">
+
+            <table class="table table-hover">
+                <thead>
+                    <tr>
+                        <th>ID</th>
+                        <th>User ID</th>
+                        <th>Username</th>
+                        <th>Type</th>
+                        <th>Name</th>
+                        <th>Email</th>
+                        <th>Message</th>
+                        <th>Date</th>
+                        <th>Action</th>
+                    </tr>
+                </thead>
+
+                <tbody>
+
+                    <!-- CUSTOMER MESSAGES -->
+                    {% for message in customer_messages %}
+                    <tr>
+                        <td>{{ message.id }}</td>
+                        <td>{{ message.user.id }}</td>
+                        <td>{{ message.user.username }}</td>
+                        <td><span class="badge badge-warning">Customer</span></td>
+                        <td>{{ message.full_name }}</td>
+                        <td>{{ message.email }}</td>
+                        <td style="max-width:200px; white-space:nowrap; overflow:hidden; text-overflow:ellipsis;">
+                            {{ message.message }}
+                        </td>
+                        <td>{{ message.created_at }}</td>
+                        <td>
+                            <a href="{% url 'delete_customer_message' message.id %}"
+                                class="btn btn-sm btn-outline-danger" onclick="return confirm('Delete this message?');">
+                                Delete
+                            </a>
+                        </td>
+                    </tr>
+                    {% endfor %}
+
+                    <!-- PROVIDER MESSAGES -->
+                    {% for message in provider_messages %}
+                    <tr>
+                        <td>{{ message.id }}</td>
+                        <td>{{ message.user.id }}</td>
+                        <td>{{ message.user.username }}</td>
+                        <td><span class="badge badge-primary">Provider</span></td>
+                        <td>{{ message.full_name }}</td>
+                        <td>{{ message.email }}</td>
+                        <td style="max-width:200px; white-space:nowrap; overflow:hidden; text-overflow:ellipsis;">
+                            {{ message.message }}
+                        </td>
+                        <td>{{ message.created_at }}</td>
+                        <td>
+                            <a href="{% url 'delete_provider_message' message.id %}"
+                                class="btn btn-sm btn-outline-danger" onclick="return confirm('Delete this message?');">
+                                Delete
+                            </a>
+                        </td>
+                    </tr>
+                    {% endfor %}
+
+                    {% if not customer_messages and not provider_messages %}
+                    <tr>
+                        <td colspan="9" class="text-center text-muted">
+                            No contact messages found
+                        </td>
+                    </tr>
+                    {% endif %}
+
+                </tbody>
+            </table>
+
+        </div>
+    </div>
+
+</div>
+
+{% endblock %}

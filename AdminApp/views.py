@@ -59,7 +59,10 @@ def save_service_category(request):
 
 def display_service_categories_page(request):
     service_categories = ServiceCategoryDb.objects.all()
-    return render(request,"display-service-categories-page.html",{"service_categories":service_categories})
+    context ={
+        "service_categories": service_categories
+    }
+    return render(request,"display-service-categories-page.html",context)
 
 def edit_service_category_page(request,category_id):
     category = ServiceCategoryDb.objects.get(id=category_id)
@@ -161,3 +164,27 @@ def reject_provider(request, provider_id):
     return redirect(display_service_providers_page)
 
 # Service Provider Approve/Reject code End
+
+
+# user contact start
+def admin_contact_messages(request):
+
+    customer_messages = CustomerContactDb.objects.all().order_by("-created_at")
+    provider_messages = ServiceProviderContactDb.objects.all().order_by("-created_at")
+
+    context = {
+        "customer_messages": customer_messages,
+        "provider_messages": provider_messages,
+    }
+
+    return render(request, "admin_contact_messages.html", context)
+
+def delete_customer_message(request, message_id):
+    CustomerContactDb.objects.filter(id=message_id).delete()
+    return redirect("admin_contact_messages")
+
+def delete_provider_message(request, message_id):
+    ServiceProviderContactDb.objects.filter(id=message_id).delete()
+    return redirect("admin_contact_messages")
+
+# user contact end
