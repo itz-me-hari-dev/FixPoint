@@ -7,7 +7,7 @@ from django.contrib import messages
 from decimal import Decimal
 import math
 from django.utils import timezone
-from django.db.models import Sum
+from django.db.models import Sum , Count
 import razorpay
 from django.conf import settings
 
@@ -153,40 +153,48 @@ def service_provider_dashboard(request):
     except ServiceProviderProfileDb.DoesNotExist:
         profile = None
 
-    # All bookings
     bookings = ServiceBookingDb.objects.filter(
         service_provider=profile
-    ).order_by("-booking_date")
+    ).select_related("customer", "payment").order_by("-booking_date")
 
-    # Active Job
-    active_job = ServiceBookingDb.objects.filter(
-        service_provider=profile,
-        status="IN_PROGRESS"
-    ).first()
+    active_job = bookings.filter(status="IN_PROGRESS").first()
 
-    #Today Earnings
     today = timezone.now().date()
+    current_month = today.month
+    current_year = today.year
 
-    today_earnings = ServiceBookingDb.objects.filter(
-        service_provider=profile,
+    # Today Earnings (only paid jobs)
+    today_earnings = bookings.filter(
         status="COMPLETED",
+        payment__payment_status="SUCCESS",
         booking_date__date=today
     ).aggregate(total=Sum("total_amount"))["total"] or 0
 
-    #Last Completed Job
-    last_job = ServiceBookingDb.objects.filter(
-        service_provider=profile,
-        status="COMPLETED"
-    ).order_by("-booking_date").first()
+    # Monthly Earnings
+    monthly_earnings = bookings.filter(
+        status="COMPLETED",
+        payment__payment_status="SUCCESS",
+        booking_date__month=current_month,
+        booking_date__year=current_year
+    ).aggregate(total=Sum("total_amount"))["total"] or 0
 
-    #Total Hours Today
-    total_hours_today = ServiceBookingDb.objects.filter(
-        service_provider=profile,
+    # Total Earnings (all time)
+    total_earnings = bookings.filter(
+        status="COMPLETED",
+        payment__payment_status="SUCCESS"
+    ).aggregate(total=Sum("total_amount"))["total"] or 0
+
+    # Total Jobs
+    total_jobs = bookings.filter(status="COMPLETED").count()
+
+    # Total Hours Today
+    total_hours_today = bookings.filter(
         status="COMPLETED",
         booking_date__date=today
     ).aggregate(total=Sum("total_time"))["total"] or 0
 
-    # Service Category
+    last_job = bookings.filter(status="COMPLETED").first()
+
     service_categories = ServiceCategoryDb.objects.all()
 
     context = {
@@ -194,9 +202,12 @@ def service_provider_dashboard(request):
         "bookings": bookings,
         "active_job": active_job,
         "today_earnings": today_earnings,
+        "monthly_earnings": monthly_earnings,
+        "total_earnings": total_earnings,
+        "total_jobs": total_jobs,
         "last_job": last_job,
         "total_hours_today": total_hours_today,
-        "service_categories":service_categories,
+        "service_categories": service_categories,
     }
 
     return render(request, "service-provider-dashboard.html", context)

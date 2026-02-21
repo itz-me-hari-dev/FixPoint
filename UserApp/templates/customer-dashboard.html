@@ -68,9 +68,9 @@
                             <i class="fa fa-user fa-2x text-primary mb-2"></i>
                             <h6 class="mb-1">Profile Status</h6>
                             {% if profile and profile.full_name and profile.phone_number and profile.location %}
-                                <p class="fw-bold mb-0 text-success">Completed</p>
+                            <p class="fw-bold mb-0 text-success">Completed</p>
                             {% else %}
-                                <p class="fw-bold mb-0 text-warning">Incomplete</p>
+                            <p class="fw-bold mb-0 text-warning">Incomplete</p>
                             {% endif %}
                         </div>
                     </div>
@@ -177,8 +177,7 @@
 
                             <!-- EDIT BUTTON -->
                             <div class="text-center">
-                                <button class="btn btn-outline-primary px-4"
-                                        onclick="enableEdit()">
+                                <button class="btn btn-outline-primary px-4" onclick="enableEdit()">
                                     <i class="fa fa-pen me-2"></i>
                                     Edit Profile
                                 </button>
@@ -215,39 +214,29 @@
                                     <!-- Input + Button -->
                                     <div class="row g-2">
                                         <div class="col-md-8">
-                                            <input type="text"
-                                                class="form-control"
-                                                id="customer_location"
-                                                name="location"
-                                                value="{{ profile.location }}"
-                                                required>
+                                            <input type="text" class="form-control" id="customer_location"
+                                                name="location" value="{{ profile.location }}" required>
                                         </div>
 
                                         <div class="col-md-4">
-                                            <button type="button"
-                                                    class="btn btn-outline-primary w-100"
-                                                    onclick="getCustomerCurrentLocation()">
+                                            <button type="button" class="btn btn-outline-primary w-100"
+                                                onclick="getCustomerCurrentLocation()">
                                                 Use Current Location
                                             </button>
                                         </div>
                                     </div>
 
                                     <!-- Hidden Latitude & Longitude -->
-                                    <input type="hidden"
-                                        id="customer_latitude"
-                                        name="latitude"
+                                    <input type="hidden" id="customer_latitude" name="latitude"
                                         value="{{ profile.latitude }}">
 
-                                    <input type="hidden"
-                                        id="customer_longitude"
-                                        name="longitude"
+                                    <input type="hidden" id="customer_longitude" name="longitude"
                                         value="{{ profile.longitude }}">
 
                                     <!-- Map -->
                                     <div class="mt-3">
-                                        <div id="customer_map"
-                                            class="rounded border shadow-sm"
-                                            style="height:300px;"></div>
+                                        <div id="customer_map" class="rounded border shadow-sm" style="height:300px;">
+                                        </div>
                                     </div>
 
                                 </div>
@@ -296,81 +285,79 @@
 
                             <tbody>
 
-                            {% for booking in bookings %}
-                            <tr>
+                                {% for booking in bookings %}
+                                <tr>
 
-                                <!-- Date -->
-                                <td>
-                                    {{ booking.booking_date|date:"d M Y" }}
-                                </td>
+                                    <!-- Date -->
+                                    <td>
+                                        {{ booking.booking_date|date:"d M Y" }}
+                                    </td>
 
-                                <!-- Service Type -->
-                                <td>
-                                    {{ booking.service_type }}
-                                </td>
+                                    <!-- Service Type -->
+                                    <td>
+                                        {{ booking.service_type }}
+                                    </td>
 
-                                <!-- Provider Name -->
-                                <td>
-                                    {{ booking.service_provider.full_name }}
-                                </td>
+                                    <!-- Provider Name -->
+                                    <td>
+                                        {{ booking.service_provider.full_name }}
+                                    </td>
 
-                                <!-- Amount -->
-                                <td class="fw-bold text-primary">
-                                    {% if booking.total_amount %}
+                                    <!-- Amount -->
+                                    <td class="fw-bold text-primary">
+                                        {% if booking.total_amount %}
                                         ₹{{ booking.total_amount }}
-                                    {% else %}
+                                        {% else %}
                                         —
-                                    {% endif %}
-                                </td>
+                                        {% endif %}
+                                    </td>
 
-                                <!-- Status Badge -->
-                                <td>
+                                    <!-- Status Badge -->
+                                    <td>
 
-                                    {% if booking.status == "COMPLETED" %}
+                                        {% if booking.status == "COMPLETED" %}
 
                                         {% if booking.payment %}
 
-                                            {% if booking.payment.payment_status == "SUCCESS" %}
-                                                <span class="badge bg-success">Paid</span>
-
-                                            {% else %}
-                                                <a href="{% url 'create_payment' booking.id %}" 
-                                                class="btn btn-sm btn-success">
-                                                    Pay Now
-                                                </a>
-                                            {% endif %}
+                                        {% if booking.payment.payment_status == "SUCCESS" %}
+                                        <span class="badge bg-success">Paid</span>
 
                                         {% else %}
-                                            <a href="{% url 'create_payment' booking.id %}" 
-                                            class="btn btn-sm btn-success">
-                                                Pay Now
-                                            </a>
+                                        <a href="{% url 'create_payment' booking.id %}" class="btn btn-sm btn-success">
+                                            Pay Now
+                                        </a>
                                         {% endif %}
 
-                                    {% elif booking.status == "PENDING" %}
+                                        {% else %}
+                                        <a href="{% url 'create_payment' booking.id %}" class="btn btn-sm btn-success">
+                                            Pay Now
+                                        </a>
+                                        {% endif %}
+
+                                        {% elif booking.status == "PENDING" %}
                                         <span class="badge bg-warning">Pending</span>
 
-                                    {% elif booking.status == "ACCEPTED" %}
+                                        {% elif booking.status == "ACCEPTED" %}
                                         <span class="badge bg-info">Accepted</span>
 
-                                    {% elif booking.status == "IN_PROGRESS" %}
+                                        {% elif booking.status == "IN_PROGRESS" %}
                                         <span class="badge bg-primary">In Progress</span>
 
-                                    {% else %}
+                                        {% else %}
                                         <span class="badge bg-danger">Cancelled</span>
-                                    {% endif %}
+                                        {% endif %}
 
-                                </td>
+                                    </td>
 
-                            </tr>
+                                </tr>
 
-                            {% empty %}
-                            <tr>
-                                <td colspan="5" class="text-center text-muted">
-                                    No bookings found.
-                                </td>
-                            </tr>
-                            {% endfor %}
+                                {% empty %}
+                                <tr>
+                                    <td colspan="5" class="text-center text-muted">
+                                        No bookings found.
+                                    </td>
+                                </tr>
+                                {% endfor %}
 
                             </tbody>
 
@@ -386,27 +373,26 @@
 </div>
 
 <script>
-    
+
     function enableEdit() {
 
-    document.getElementById("profileView").classList.add("d-none");
-    document.getElementById("profileEdit").classList.remove("d-none");
+        document.getElementById("profileView").classList.add("d-none");
+        document.getElementById("profileEdit").classList.remove("d-none");
 
-    setTimeout(() => {
+        setTimeout(() => {
 
-        if (typeof customerMapInitialized !== "undefined") {
+            if (typeof customerMapInitialized !== "undefined") {
 
-            if (!customerMapInitialized) {
-                initializeCustomerMap();
-            } else if (typeof customerMap !== "undefined") {
-                customerMap.invalidateSize();
+                if (!customerMapInitialized) {
+                    initializeCustomerMap();
+                } else if (typeof customerMap !== "undefined") {
+                    customerMap.invalidateSize();
+                }
+
             }
 
-        }
-
-    }, 400);
-}
-
+        }, 400);
+    }
 
     function cancelEdit() {
         document.getElementById("profileEdit").classList.add("d-none");
@@ -414,28 +400,38 @@
     }
 
     function showSection(sectionId, el) {
-        document.querySelectorAll('.section').forEach(sec => sec.classList.add('d-none'));
-        document.getElementById(sectionId).classList.remove('d-none');
 
-        document.querySelectorAll('.nav-link').forEach(link => link.classList.remove('active', 'fw-bold'));
+        document.querySelectorAll('.section').forEach(sec => sec.classList.add('d-none'));
+
+        const targetSection = document.getElementById(sectionId);
+
+        if (targetSection) {
+            targetSection.classList.remove('d-none');
+            localStorage.setItem("activeSection", sectionId);   // ✅ SAVE IT
+        }
+
+        document.querySelectorAll('.nav-link').forEach(link =>
+            link.classList.remove('active', 'fw-bold')
+        );
+
         if (el) el.classList.add('active', 'fw-bold');
     }
 
     document.addEventListener("DOMContentLoaded", function () {
 
-    const savedSection = localStorage.getItem("activeSection") || "dashboard";
+        const savedSection = localStorage.getItem("activeSection") || "dashboard";
 
-    const navLinks = document.querySelectorAll('.nav-link');
-    let targetLink = null;
+        const navLinks = document.querySelectorAll('.nav-link');
+        let targetLink = null;
 
-    navLinks.forEach(link => {
-        if (link.getAttribute("onclick")?.includes(savedSection)) {
-            targetLink = link;
-        }
+        navLinks.forEach(link => {
+            if (link.getAttribute("onclick")?.includes(savedSection)) {
+                targetLink = link;
+            }
+        });
+
+        showSection(savedSection, targetLink);
     });
-
-    showSection(savedSection, targetLink);
-});
 
 </script>
 
@@ -479,89 +475,88 @@
 
 </script>
 
-<div id="customer-map-data"
-     data-lat="{{ profile.latitude|default:'20.5937' }}"
-     data-lon="{{ profile.longitude|default:'78.9629' }}"
-     data-has-location="{% if profile and profile.latitude and profile.longitude %}true{% else %}false{% endif %}">
+<div id="customer-map-data" data-lat="{{ profile.latitude|default:'20.5937' }}"
+    data-lon="{{ profile.longitude|default:'78.9629' }}"
+    data-has-location="{% if profile and profile.latitude and profile.longitude %}true{% else %}false{% endif %}">
 </div>
 
 <script src="https://unpkg.com/leaflet/dist/leaflet.js"></script>
 
 <script>
 
-let customerMap;
-let customerMarker;
-let customerMapInitialized = false;
+    let customerMap;
+    let customerMarker;
+    let customerMapInitialized = false;
 
-function initializeCustomerMap() {
+    function initializeCustomerMap() {
 
-    if (customerMapInitialized) return;
+        if (customerMapInitialized) return;
 
-    const mapData = document.getElementById("customer-map-data");
+        const mapData = document.getElementById("customer-map-data");
 
-    let defaultLat = parseFloat(mapData.dataset.lat);
-    let defaultLon = parseFloat(mapData.dataset.lon);
-    let defaultZoom = mapData.dataset.hasLocation === "true" ? 15 : 5;
+        let defaultLat = parseFloat(mapData.dataset.lat);
+        let defaultLon = parseFloat(mapData.dataset.lon);
+        let defaultZoom = mapData.dataset.hasLocation === "true" ? 15 : 5;
 
-    customerMap = L.map('customer_map').setView([defaultLat, defaultLon], defaultZoom);
+        customerMap = L.map('customer_map').setView([defaultLat, defaultLon], defaultZoom);
 
-    L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
-        attribution: '© OpenStreetMap contributors'
-    }).addTo(customerMap);
+        L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+            attribution: '© OpenStreetMap contributors'
+        }).addTo(customerMap);
 
-    customerMarker = L.marker([defaultLat, defaultLon]).addTo(customerMap);
+        customerMarker = L.marker([defaultLat, defaultLon]).addTo(customerMap);
 
-    customerMap.on('click', function(e) {
+        customerMap.on('click', function (e) {
 
-        const lat = e.latlng.lat.toFixed(6);
-        const lon = e.latlng.lng.toFixed(6);
+            const lat = e.latlng.lat.toFixed(6);
+            const lon = e.latlng.lng.toFixed(6);
 
-        document.getElementById("customer_latitude").value = lat;
-        document.getElementById("customer_longitude").value = lon;
+            document.getElementById("customer_latitude").value = lat;
+            document.getElementById("customer_longitude").value = lon;
 
-        customerMarker.setLatLng([lat, lon]);
+            customerMarker.setLatLng([lat, lon]);
 
-        fetch(`https://nominatim.openstreetmap.org/reverse?format=json&lat=${lat}&lon=${lon}`)
-            .then(res => res.json())
-            .then(data => {
-                const addr = data.address || {};
-                document.getElementById("customer_location").value =
-                    addr.town ||
-                    addr.city ||
-                    addr.village ||
-                    addr.suburb ||
-                    addr.state ||
-                    "";
-            });
-    });
+            fetch(`https://nominatim.openstreetmap.org/reverse?format=json&lat=${lat}&lon=${lon}`)
+                .then(res => res.json())
+                .then(data => {
+                    const addr = data.address || {};
+                    document.getElementById("customer_location").value =
+                        addr.town ||
+                        addr.city ||
+                        addr.village ||
+                        addr.suburb ||
+                        addr.state ||
+                        "";
+                });
+        });
 
-    customerMapInitialized = true;
-}
-
-function getCustomerCurrentLocation() {
-
-    if (!navigator.geolocation) {
-        alert("Geolocation not supported");
-        return;
+        customerMapInitialized = true;
     }
 
-    navigator.geolocation.getCurrentPosition(function(position) {
+    function getCustomerCurrentLocation() {
 
-        const lat = position.coords.latitude.toFixed(6);
-        const lon = position.coords.longitude.toFixed(6);
+        if (!navigator.geolocation) {
+            alert("Geolocation not supported");
+            return;
+        }
 
-        document.getElementById("customer_latitude").value = lat;
-        document.getElementById("customer_longitude").value = lon;
+        navigator.geolocation.getCurrentPosition(function (position) {
 
-        if (!customerMapInitialized) initializeCustomerMap();
+            const lat = position.coords.latitude.toFixed(6);
+            const lon = position.coords.longitude.toFixed(6);
 
-        customerMap.setView([lat, lon], 15);
-        customerMarker.setLatLng([lat, lon]);
+            document.getElementById("customer_latitude").value = lat;
+            document.getElementById("customer_longitude").value = lon;
 
-    }, function() {
-        alert("Location permission denied");
-    });
-}
+            if (!customerMapInitialized) initializeCustomerMap();
+
+            customerMap.setView([lat, lon], 15);
+            customerMarker.setLatLng([lat, lon]);
+
+        }, function () {
+            alert("Location permission denied");
+        });
+    }
 
 </script>
 

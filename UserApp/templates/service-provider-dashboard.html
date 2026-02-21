@@ -80,130 +80,122 @@
             </div>
 
             <!-- DASHBOARD -->
-            <div id="dashboard" class="section"> 
+            <div id="dashboard" class="section">
 
-                <!-- STATUS MESSAGE -->
+                <!-- Welcome Alert -->
                 <div class="alert alert-info mb-4">
                     <i class="fa fa-info-circle me-2"></i>
-                    Welcome back! Keep your profile updated to receive more jobs.
+                    Welcome back {{ profile.full_name|default:"Provider" }}!
+                    Manage your jobs and track your earnings here.
                 </div>
 
-                <!-- TOP STATS -->
+                <!-- ================= TOP STATS ================= -->
                 <div class="row g-4 mb-4">
 
-                    <!-- Approval + Availability -->
+                    <!-- Account Status -->
                     <div class="col-md-3">
-                        <div class="bg-light rounded shadow p-4 text-center h-100">
-                            <i class="fa fa-user-check fa-2x text-warning mb-2"></i>
-                            <h6 class="mb-1">Account Status</h6>
-                            {% if profile %}
+                        <div class="bg-white rounded shadow-sm p-4 text-center h-100 border">
+                            <i class="fa fa-user-check fa-2x text-warning mb-3"></i>
+                            <h6 class="fw-semibold">Account Status</h6>
 
-                                <!-- APPROVAL STATUS -->
-                                {% if profile.approval_status == "PENDING" %}
-                                    <span class="badge bg-warning d-block mb-2">
-                                        Pending Approval
-                                    </span>
-
-                                {% elif profile.approval_status == "APPROVED" %}
-                                    <span class="badge bg-success d-block mb-2">
-                                        Approved
-                                    </span>
-
-                                {% elif profile.approval_status == "REJECTED" %}
-                                    <span class="badge bg-danger d-block mb-2">
-                                        Rejected
-                                    </span>
-                                {% endif %}
-
-                                <!-- AVAILABILITY STATUS -->
-                                {% if profile.is_available %}
-                                    <span class="badge bg-success">
-                                        Available
-                                    </span>
-                                {% else %}
-                                    <span class="badge bg-secondary">
-                                        Busy
-                                    </span>
-                                {% endif %}
-
+                            {% if profile.approval_status == "APPROVED" %}
+                                <span class="badge bg-success d-block mb-2">Approved</span>
+                            {% elif profile.approval_status == "PENDING" %}
+                                <span class="badge bg-warning d-block mb-2">Pending Approval</span>
+                            {% else %}
+                                <span class="badge bg-danger d-block mb-2">Rejected</span>
                             {% endif %}
 
+                            {% if profile.is_available %}
+                                <span class="badge bg-success">Available</span>
+                            {% else %}
+                                <span class="badge bg-secondary">Busy</span>
+                            {% endif %}
                         </div>
                     </div>
 
                     <!-- Active Job -->
                     <div class="col-md-3">
-                        <div class="bg-light rounded shadow p-4 text-center h-100">
-
-                            <i class="fa fa-briefcase fa-2x text-secondary mb-2"></i>
-                            <h6 class="mb-1">Active Job</h6>
+                        <div class="bg-white rounded shadow-sm p-4 text-center h-100 border">
+                            <i class="fa fa-briefcase fa-2x text-secondary mb-3"></i>
+                            <h6 class="fw-semibold">Active Job</h6>
 
                             {% if active_job %}
-                                <p class="fw-bold mb-0">
-                                    {{ active_job.service_type }}
-                                </p>
-                                <small class="text-success">
-                                    In Progress
-                                </small>
+                                <strong>{{ active_job.service_type }}</strong>
+                                <br>
+                                <small class="text-success">In Progress</small>
                             {% else %}
-                                <p class="fw-bold mb-0">None</p>
-                                <small class="text-muted">
-                                    No job running
-                                </small>
+                                <strong>None</strong>
+                                <br>
+                                <small class="text-muted">No job running</small>
                             {% endif %}
-
                         </div>
                     </div>
-
 
                     <!-- Today Earnings -->
                     <div class="col-md-3">
-                        <div class="bg-light rounded shadow p-4 text-center h-100">
-
-                            <i class="fa fa-rupee-sign fa-2x text-primary mb-2"></i>
-                            <h6 class="mb-1">Today</h6>
-
-                            <h4 class="text-primary mb-0">
-                            ₹{{ today_earnings|floatformat:2 }}
+                        <div class="bg-white rounded shadow-sm p-4 text-center h-100 border">
+                            <i class="fa fa-calendar-day fa-2x text-primary mb-3"></i>
+                            <h6 class="fw-semibold">Today</h6>
+                            <h4 class="fw-bold text-primary">
+                                ₹{{ today_earnings|floatformat:2 }}
                             </h4>
-
-                            <small class="text-muted">
-                                Earnings today
-                            </small>
-
+                            <small class="text-muted">Today's Earnings</small>
                         </div>
                     </div>
 
-
                     <!-- Monthly Earnings -->
                     <div class="col-md-3">
-                        <div class="bg-light rounded shadow p-4 text-center h-100">
-                            <i class="fa fa-wallet fa-2x text-primary mb-2"></i>
-                            <h6 class="mb-1">This Month</h6>
-                            <h4 class="text-primary mb-0">₹12,500</h4>
-                            <small class="text-muted">Monthly total</small>
+                        <div class="bg-white rounded shadow-sm p-4 text-center h-100 border">
+                            <i class="fa fa-calendar-alt fa-2x text-success mb-3"></i>
+                            <h6 class="fw-semibold">This Month</h6>
+                            <h4 class="fw-bold text-success">
+                                ₹{{ monthly_earnings|floatformat:2 }}
+                            </h4>
+                            <small class="text-muted">Monthly Earnings</small>
                         </div>
                     </div>
 
                 </div>
 
-                <!-- SECOND ROW -->
+                <!-- ================= SECOND ROW ================= -->
                 <div class="row g-4">
 
-                    <!-- JOB ACTIVITY -->
+                    <!-- Job & Performance -->
                     <div class="col-md-6">
-                        <div class="bg-light rounded shadow p-4 h-100">
+                        <div class="bg-white rounded shadow-sm p-4 h-100 border">
 
-                            <h6 class="mb-3">
-                                <i class="fa fa-clock me-2 text-primary"></i>
-                                Job Activity
+                            <h6 class="fw-semibold mb-3">
+                                <i class="fa fa-chart-line me-2 text-primary"></i>
+                                Performance Summary
                             </h6>
 
-                            <!-- LAST JOB -->
                             <p class="mb-2">
-                                <i class="fa fa-tools me-2 text-secondary"></i>
-                                <strong>Last Job:</strong>
+                                <strong>Total Jobs Completed:</strong>
+                                {{ total_jobs }}
+                            </p>
 
+                            <p class="mb-2">
+                                <strong>Total Hours Today:</strong>
+                                {{ total_hours_today|floatformat:2 }} hrs
+                            </p>
+
+                            <p class="mb-2">
+                                <strong>Total Earnings (All Time):</strong>
+                                ₹{{ total_earnings|floatformat:2 }}
+                            </p>
+
+                            <p class="mb-0">
+                                <strong>Current Location:</strong>
+                                <span class="text-muted">
+                                    {{ profile.location|default:"Not Set" }}
+                                </span>
+                            </p>
+
+                            <hr>
+
+                            <p class="mb-0">
+                                <strong>Last Completed Job:</strong>
                                 {% if last_job %}
                                     {{ last_job.service_type }}
                                     ({{ last_job.total_time|floatformat:2 }} hrs)
@@ -212,70 +204,48 @@
                                 {% endif %}
                             </p>
 
-                            <!-- TOTAL HOURS TODAY -->
-                            <p class="mb-2">
-                                <i class="fa fa-hourglass-half me-2 text-secondary"></i>
-                                <strong>Total Hours Today:</strong>
-                                {{ total_hours_today|floatformat:2 }} hrs
-                            </p>
-
-                            <!-- CURRENT LOCATION -->
-                            <p class="mb-0">
-                                <i class="fa fa-map-marker-alt me-2 text-secondary"></i>
-                                <strong>Current Location:</strong>
-
-                                {% if profile.location %}
-                                    <span class="text-muted">
-                                        {{ profile.location }}
-                                    </span>
-                                {% else %}
-                                    <span class="text-muted">
-                                        Not set
-                                    </span>
-                                {% endif %}
-                            </p>
-
                         </div>
                     </div>
 
-
-                    <!-- QUICK ACTIONS -->
+                    <!-- Quick Actions -->
                     <div class="col-md-6">
-                        <div class="bg-light rounded shadow p-4 h-100">
-                            <h6 class="mb-3">
+                        <div class="bg-white rounded shadow-sm p-4 h-100 border">
+
+                            <h6 class="fw-semibold mb-3">
                                 <i class="fa fa-bolt me-2 text-primary"></i>
                                 Quick Actions
                             </h6>
 
-                            <div class="d-grid gap-2">
-                                <button class="btn btn-outline-primary">
+                            <div class="d-grid gap-3">
+
+                                <button class="btn btn-outline-primary"
+                                        onclick="showSection('profile', this)">
                                     <i class="fa fa-user-edit me-2"></i>
                                     Update Profile
                                 </button>
 
-                                <form method="post" action="{% url 'toggle_availability' %}" class="d-grid">
+                                <form method="post" action="{% url 'toggle_availability' %}">
                                     {% csrf_token %}
-
                                     <button type="submit"
-                                        class="btn {% if profile.is_available %}btn-outline-success{% else %}btn-outline-danger{% endif %} w-100">
-
-                                        <i
-                                            class="fa {% if profile.is_available %}fa-toggle-on{% else %}fa-toggle-off{% endif %} me-2"></i>
+                                        class="btn w-100 {% if profile.is_available %}btn-outline-danger{% else %}btn-outline-success{% endif %}">
+                                        <i class="fa {% if profile.is_available %}fa-toggle-off{% else %}fa-toggle-on{% endif %} me-2"></i>
 
                                         {% if profile.is_available %}
-                                        Go Busy
+                                            Go Busy
                                         {% else %}
-                                        Go Available
+                                            Go Available
                                         {% endif %}
-
                                     </button>
                                 </form>
 
-                                <button class="btn btn-outline-secondary">
+                                <button class="btn btn-outline-secondary"
+                                        onclick="showSection('history', this)">
                                     <i class="fa fa-history me-2"></i>
                                     View Job History
                                 </button>
+
                             </div>
+
                         </div>
                     </div>
 
@@ -716,38 +686,128 @@
                                 <tr>
                                     <th>Date</th>
                                     <th>Service</th>
-                                    <th>Hours</th>
-                                    <th>Amount</th>
-                                    <th>Status</th>
+                                    <th>Customer</th>
+                                    <th>Work Hours</th>
+                                    <th>Location</th>
+                                    <th>Job Status</th>
+                                    <th>Payment Status</th>
+                                    <th>Earnings</th>
                                 </tr>
                             </thead>
 
                             <tbody>
-                                <tr>
-                                    <td>12 Jan 2026</td>
-                                    <td>
-                                        <i class="fa fa-tools me-1 text-secondary"></i>
-                                        Plumbing
-                                    </td>
-                                    <td>2 hrs</td>
-                                    <td class="fw-bold text-primary">₹1,000</td>
-                                    <td>
-                                        <span class="badge bg-success">Completed</span>
-                                    </td>
-                                </tr>
 
-                                <tr>
-                                    <td>10 Jan 2026</td>
-                                    <td>
-                                        <i class="fa fa-bolt me-1 text-secondary"></i>
-                                        Electrical
-                                    </td>
-                                    <td>1.5 hrs</td>
-                                    <td class="fw-bold text-primary">₹750</td>
-                                    <td>
-                                        <span class="badge bg-success">Completed</span>
-                                    </td>
-                                </tr>
+                            {% for booking in bookings %}
+                            <tr>
+
+                                <!-- Date -->
+                                <td>
+                                    {{ booking.booking_date|date:"d M Y" }}
+                                    <br>
+                                    <small class="text-muted">
+                                        {{ booking.booking_date|date:"h:i A" }}
+                                    </small>
+                                </td>
+
+                                <!-- Service -->
+                                <td>
+                                    <i class="fa fa-tools me-1 text-secondary"></i>
+                                    {{ booking.service_type }}
+                                </td>
+
+                                <!-- Customer Name -->
+                                <td>
+                                    {{ booking.customer.full_name }}
+                                </td>
+
+                                <!-- Work Hours -->
+                                <td>
+                                    {% if booking.total_time %}
+                                        {{ booking.total_time }} hrs
+                                    {% else %}
+                                        —
+                                    {% endif %}
+                                </td>
+
+                                <!-- Location -->
+                                <td>
+                                    {{ booking.customer.location|default:"—" }}
+                                </td>
+
+                                <!-- Job Status -->
+                                <td>
+                                    {% if booking.status == "COMPLETED" %}
+                                        <span class="badge bg-success">
+                                            <i class="fa fa-check me-1"></i>
+                                            Completed
+                                        </span>
+                                    {% elif booking.status == "IN_PROGRESS" %}
+                                        <span class="badge bg-primary">
+                                            <i class="fa fa-spinner me-1"></i>
+                                            In Progress
+                                        </span>
+                                    {% elif booking.status == "ACCEPTED" %}
+                                        <span class="badge bg-info text-dark">
+                                            Accepted
+                                        </span>
+                                    {% elif booking.status == "PENDING" %}
+                                        <span class="badge bg-warning text-dark">
+                                            Pending
+                                        </span>
+                                    {% else %}
+                                        <span class="badge bg-danger">
+                                            Cancelled
+                                        </span>
+                                    {% endif %}
+                                </td>
+
+                                <!-- Payment Status (Provider View) -->
+                                <td>
+                                    {% if booking.status == "COMPLETED" %}
+
+                                        {% if booking.payment %}
+
+                                            {% if booking.payment.payment_status == "SUCCESS" %}
+                                                <span class="badge bg-success">
+                                                    <i class="fa fa-wallet me-1"></i>
+                                                    Payment Received
+                                                </span>
+                                            {% else %}
+                                                <span class="badge bg-warning text-dark">
+                                                    Awaiting Customer Payment
+                                                </span>
+                                            {% endif %}
+
+                                        {% else %}
+                                            <span class="badge bg-secondary">
+                                                Not Paid Yet
+                                            </span>
+                                        {% endif %}
+
+                                    {% else %}
+                                        —
+                                    {% endif %}
+                                </td>
+
+                                <!-- Earnings -->
+                                <td class="fw-bold text-success">
+                                    {% if booking.payment and booking.payment.payment_status == "SUCCESS" %}
+                                        ₹{{ booking.payment.amount }}
+                                    {% else %}
+                                        —
+                                    {% endif %}
+                                </td>
+
+                            </tr>
+
+                            {% empty %}
+                            <tr>
+                                <td colspan="8" class="text-center text-muted py-4">
+                                    No job history found.
+                                </td>
+                            </tr>
+                            {% endfor %}
+
                             </tbody>
                         </table>
                     </div>
