@@ -14,7 +14,6 @@ class UserDb(models.Model):
     user_role = models.CharField(max_length=20,choices=ROLE_CHOICES)
     is_approved = models.BooleanField(default=False)
 
-
 class ServiceProviderProfileDb(models.Model):
 
     APPROVAL_STATUS = (
@@ -70,7 +69,6 @@ class ServiceProviderProfileDb(models.Model):
     def __str__(self):
         return f"{self.full_name} (ServiceProvider)"
 
-
 class CustomerProfileDb(models.Model):
 
     user = models.OneToOneField(UserDb, on_delete=models.CASCADE)
@@ -99,7 +97,6 @@ class CustomerProfileDb(models.Model):
 
     def __str__(self):
         return f"{self.full_name} (Customer)"
-
 
 class ServiceBookingDb(models.Model):
 
@@ -144,5 +141,43 @@ class ServiceBookingDb(models.Model):
         default='PENDING'
     )
 
+    travel_distance = models.DecimalField(
+        max_digits=6,
+        decimal_places=2,
+        null=True,
+        blank=True
+    )
+
     def __str__(self):
         return f"{self.customer.full_name} → {self.service_provider.full_name}"
+
+class PaymentDb(models.Model):
+
+    PAYMENT_STATUS = (
+        ('PENDING', 'Pending'),
+        ('SUCCESS', 'Success'),
+        ('FAILED', 'Failed'),
+    )
+
+    booking = models.OneToOneField(
+        ServiceBookingDb,
+        on_delete=models.CASCADE,
+        related_name="payment"
+    )
+
+    razorpay_order_id = models.CharField(max_length=200, null=True, blank=True)
+    razorpay_payment_id = models.CharField(max_length=200, null=True, blank=True)
+    razorpay_signature = models.CharField(max_length=300, null=True, blank=True)
+
+    amount = models.DecimalField(max_digits=10, decimal_places=2)
+
+    payment_status = models.CharField(
+        max_length=20,
+        choices=PAYMENT_STATUS,
+        default="PENDING"
+    )
+
+    created_at = models.DateTimeField(auto_now_add=True)
+
+    def __str__(self):
+        return f"Payment for Booking #{self.booking.id}"

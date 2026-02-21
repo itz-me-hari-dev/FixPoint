@@ -325,8 +325,27 @@
 
                                 <!-- Status Badge -->
                                 <td>
+
                                     {% if booking.status == "COMPLETED" %}
-                                        <span class="badge bg-success">Completed</span>
+
+                                        {% if booking.payment %}
+
+                                            {% if booking.payment.payment_status == "SUCCESS" %}
+                                                <span class="badge bg-success">Paid</span>
+
+                                            {% else %}
+                                                <a href="{% url 'create_payment' booking.id %}" 
+                                                class="btn btn-sm btn-success">
+                                                    Pay Now
+                                                </a>
+                                            {% endif %}
+
+                                        {% else %}
+                                            <a href="{% url 'create_payment' booking.id %}" 
+                                            class="btn btn-sm btn-success">
+                                                Pay Now
+                                            </a>
+                                        {% endif %}
 
                                     {% elif booking.status == "PENDING" %}
                                         <span class="badge bg-warning">Pending</span>
@@ -340,6 +359,7 @@
                                     {% else %}
                                         <span class="badge bg-danger">Cancelled</span>
                                     {% endif %}
+
                                 </td>
 
                             </tr>

@@ -1,13 +1,15 @@
 from django.shortcuts import render,redirect, get_object_or_404
 from django.utils.datastructures import MultiValueDictKeyError
 from django.core.files.storage import FileSystemStorage
-from UserApp.models import UserDb,ServiceProviderProfileDb,CustomerProfileDb,ServiceBookingDb
+from UserApp.models import *
 from AdminApp.models import *
 from django.contrib import messages
 from decimal import Decimal
 import math
 from django.utils import timezone
 from django.db.models import Sum
+import razorpay
+from django.conf import settings
 
 
 # Create your views here.
@@ -282,30 +284,28 @@ def customer_dashboard(request):
     except CustomerProfileDb.DoesNotExist:
         profile = None
 
-    # Default values (safe fallback)
     total_bookings = 0
     total_spent = 0
     bookings = []
 
     if profile:
-        # Total Bookings
         total_bookings = ServiceBookingDb.objects.filter(
             customer=profile
         ).count()
 
-        # Total Spent (only completed bookings)
-        total_spent = ServiceBookingDb.objects.filter(
-            customer=profile,
-            status="COMPLETED"
+        # Only count successful payments
+        total_spent = PaymentDb.objects.filter(
+            booking__customer=profile,
+            payment_status="SUCCESS"
         ).aggregate(
-            total=Sum("total_amount")
+            total=Sum("amount")
         )["total"] or 0
 
-        # ADD THIS (Booking History)
         bookings = ServiceBookingDb.objects.filter(
             customer=profile
         ).select_related(
-            "service_provider"
+            "service_provider",
+            "payment"
         ).order_by("-booking_date")
 
     context = {
@@ -313,7 +313,7 @@ def customer_dashboard(request):
         "user": user,
         "total_bookings": total_bookings,
         "total_spent": total_spent,
-        "bookings":bookings,
+        "bookings": bookings,
     }
 
     return render(request, "customer-dashboard.html", context)
@@ -456,10 +456,24 @@ def provider_start_job(request, booking_id):
         service_provider=provider_profile
     )
 
-    # Prevent double start
     if booking.status != "ACCEPTED":
         messages.error(request, "Job cannot be started.")
         return redirect("service_provider_dashboard")
+
+    # Calculate travel distance here
+    if (
+        provider_profile.latitude and provider_profile.longitude and
+        booking.customer.latitude and booking.customer.longitude
+    ):
+
+        distance = calculate_distance(
+            float(provider_profile.latitude),
+            float(provider_profile.longitude),
+            float(booking.customer.latitude),
+            float(booking.customer.longitude)
+        )
+
+        booking.travel_distance = Decimal(str(distance))
 
     booking.start_time = timezone.now()
     booking.status = "IN_PROGRESS"
@@ -483,7 +497,6 @@ def provider_stop_job(request, booking_id):
         service_provider=provider_profile
     )
 
-    # Prevent stopping wrong status
     if booking.status != "IN_PROGRESS":
         messages.error(request, "Job is not in progress.")
         return redirect("service_provider_dashboard")
@@ -494,13 +507,30 @@ def provider_stop_job(request, booking_id):
 
     booking.end_time = timezone.now()
 
+    # Calculate working hours
     duration = booking.end_time - booking.start_time
     total_hours = Decimal(duration.total_seconds()) / Decimal(3600)
 
-    booking.total_time = round(float(total_hours), 2)
+    # Round to 2 decimal places
+    total_hours = total_hours.quantize(Decimal("0.01"))
+    booking.total_time = total_hours
 
-    booking.total_amount = (
+    # Work charge
+    work_charge = (
         total_hours * booking.service_provider.hourly_rate
+    ).quantize(Decimal("0.01"))
+
+    # Travel charge
+    travel_charge = Decimal("0.00")
+
+    if booking.travel_distance:
+        travel_charge = (
+            booking.travel_distance * Decimal("10")
+        ).quantize(Decimal("0.01"))
+
+    # Final total
+    booking.total_amount = (
+        work_charge + travel_charge
     ).quantize(Decimal("0.01"))
 
     booking.status = "COMPLETED"
@@ -542,8 +572,103 @@ def reject_booking(request, booking_id):
     booking.save()
     return redirect("service_provider_dashboard")
 
+def create_payment(request, booking_id):
 
+    if not request.session.get("username"):
+        return redirect("user_authentication")
 
+    booking = get_object_or_404(ServiceBookingDb, id=booking_id)
 
+    # Allow only completed jobs
+    if booking.status != "COMPLETED":
+        messages.error(request, "Payment not allowed.")
+        return redirect("customer_dashboard")
 
+    # Check existing payment
+    existing_payment = PaymentDb.objects.filter(booking=booking).first()
 
+    # If already paid → block
+    if existing_payment and existing_payment.payment_status == "SUCCESS":
+        messages.error(request, "Payment already completed.")
+        return redirect("customer_dashboard")
+
+    # If pending → delete and recreate
+    if existing_payment and existing_payment.payment_status == "PENDING":
+        existing_payment.delete()
+
+    # -----------------------------
+    # Billing Breakdown Calculation
+    # -----------------------------
+
+    # Convert total_time safely to Decimal
+    total_time_decimal = Decimal(str(booking.total_time))
+
+    # Work charge
+    work_charge = (
+        total_time_decimal *
+        booking.service_provider.hourly_rate
+    ).quantize(Decimal("0.01"))
+
+    # Travel charge
+    travel_charge = Decimal("0.00")
+
+    if booking.travel_distance:
+        travel_charge = (
+            Decimal(str(booking.travel_distance)) *
+            Decimal("10")
+        ).quantize(Decimal("0.01"))
+
+    # Final amount
+    final_amount = (work_charge + travel_charge).quantize(Decimal("0.01"))
+
+    # -----------------------------
+    # Razorpay Order Creation
+    # -----------------------------
+
+    client = razorpay.Client(
+        auth=(settings.RAZORPAY_KEY_ID, settings.RAZORPAY_KEY_SECRET)
+    )
+
+    amount_paise = int(final_amount * 100)
+
+    order = client.order.create({
+        "amount": amount_paise,
+        "currency": "INR",
+        "payment_capture": 1
+    })
+
+    # Save payment record
+    PaymentDb.objects.create(
+        booking=booking,
+        razorpay_order_id=order["id"],
+        amount=final_amount,
+        payment_status="PENDING"
+    )
+
+    context = {
+        "booking": booking,
+        "order": order,
+        "razorpay_key": settings.RAZORPAY_KEY_ID,
+        "work_charge": work_charge,
+        "travel_charge": travel_charge,
+        "final_amount": final_amount,
+    }
+
+    return render(request, "payment-page.html", context)
+
+def payment_success(request):
+
+    payment_id = request.GET.get("payment_id")
+    order_id = request.GET.get("order_id")
+    signature = request.GET.get("signature")
+
+    payment = PaymentDb.objects.get(razorpay_order_id=order_id)
+
+    payment.razorpay_payment_id = payment_id
+    payment.razorpay_signature = signature
+    payment.payment_status = "SUCCESS"
+    payment.save()
+
+    messages.success(request, "Payment Successful!")
+
+    return redirect("customer_dashboard")
