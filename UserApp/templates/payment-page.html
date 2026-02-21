@@ -5,112 +5,116 @@
 {% block content %}
 
 <style>
-.payment-header {
-    background: linear-gradient(rgba(0,0,0,.75), rgba(0,0,0,.75)),
-    url("{% static 'user_app_assets/img/services-banner.png' %}") center center / cover no-repeat;
-    height: 320px;
-    display:flex;
-    align-items:center;
-    justify-content:center;
-    text-align:center;
-    color:white;
-}
+    .payment-header {
+        background: linear-gradient(rgba(0, 0, 0, .75), rgba(0, 0, 0, .75)),
+        url("{% static 'user_app_assets/img/payment-page.png' %}") center center / cover no-repeat;
+        height: 320px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        text-align: center;
+        color: white;
+    }
 
-.invoice-card {
-    border-radius:16px;
-    box-shadow:0 10px 35px rgba(0,0,0,0.08);
-    padding:40px;
-    background:white;
-}
+    .invoice-card {
+        border-radius: 16px;
+        box-shadow: 0 10px 35px rgba(0, 0, 0, 0.08);
+        padding: 40px;
+        background: white;
+    }
 
-.invoice-title {
-    font-weight:700;
-    font-size:22px;
-    letter-spacing:1px;
-}
+    .invoice-title {
+        font-weight: 700;
+        font-size: 22px;
+        letter-spacing: 1px;
+    }
 
-.invoice-badge {
-    background:#f3f4f6;
-    padding:6px 14px;
-    border-radius:8px;
-    font-size:13px;
-    font-weight:500;
-    color:#555;
-}
+    .invoice-badge {
+        background: #f3f4f6;
+        padding: 6px 14px;
+        border-radius: 8px;
+        font-size: 13px;
+        font-weight: 500;
+        color: #555;
+    }
 
-.invoice-label {
-    font-size:12px;
-    text-transform:uppercase;
-    letter-spacing:.6px;
-    color:#6c757d;
-    margin-bottom:5px;
-}
+    .invoice-label {
+        font-size: 12px;
+        text-transform: uppercase;
+        letter-spacing: .6px;
+        color: #6c757d;
+        margin-bottom: 5px;
+    }
 
-.invoice-value {
-    font-size:16px;
-    font-weight:600;
-    color:#212529;
-}
+    .invoice-value {
+        font-size: 16px;
+        font-weight: 600;
+        color: #212529;
+    }
 
-.bill-section-title {
-    font-weight:600;
-    margin-top:25px;
-    margin-bottom:15px;
-}
+    .bill-section-title {
+        font-weight: 600;
+        margin-top: 25px;
+        margin-bottom: 15px;
+    }
 
-.bill-row {
-    display:flex;
-    justify-content:space-between;
-    padding:10px 0;
-    border-bottom:1px dashed #eaeaea;
-    font-size:15px;
-}
+    .bill-row {
+        display: flex;
+        justify-content: space-between;
+        padding: 10px 0;
+        border-bottom: 1px dashed #eaeaea;
+        font-size: 15px;
+    }
 
-.bill-label {
-    color:#6c757d;
-}
+    .bill-label {
+        color: #6c757d;
+    }
 
-.bill-value {
-    font-weight:600;
-    color:#212529;
-}
+    .bill-value {
+        font-weight: 600;
+        color: #212529;
+    }
 
-.total-row {
-    font-size:22px;
-    font-weight:700;
-    color:#C7902F;
-    border-bottom:none;
-    padding-top:18px;
-}
+    .total-row {
+        font-size: 22px;
+        font-weight: 700;
+        color: #C7902F;
+        border-bottom: none;
+        padding-top: 18px;
+    }
 
-.pay-btn {
-    background:linear-gradient(135deg,#C7902F,#b67a1e);
-    color:white;
-    border-radius:10px;
-    padding:14px 35px;
-    font-size:16px;
-    font-weight:600;
-    border:none;
-    transition:.3s ease;
-}
+    .pay-btn {
+        background: linear-gradient(135deg, #C7902F, #b67a1e);
+        color: white;
+        border-radius: 10px;
+        padding: 14px 35px;
+        font-size: 16px;
+        font-weight: 600;
+        border: none;
+        transition: .3s ease;
+    }
 
-.pay-btn:hover {
-    transform:translateY(-2px);
-    box-shadow:0 6px 20px rgba(199,144,47,0.4);
-}
+    .pay-btn:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 6px 20px rgba(199, 144, 47, 0.4);
+    }
 
-.secure-note {
-    font-size:13px;
-    color:#6c757d;
-    margin-top:10px;
-}
+    .secure-note {
+        font-size: 13px;
+        color: #6c757d;
+        margin-top: 10px;
+    }
 </style>
 
 <!-- HEADER -->
 <div class="container-fluid payment-header">
     <div class="container">
-        <h1 class="display-5">Payment Summary</h1>
-        <p>Secure & Encrypted Payment via Razorpay</p>
+        <h1 class="display-5 text-white fw-bold">
+            Payment Summary
+        </h1>
+        <p class="text-light">
+            Secure & Encrypted Payment via Razorpay
+        </p>
     </div>
 </div>
 
@@ -239,40 +243,45 @@
 <script src="https://checkout.razorpay.com/v1/checkout.js"></script>
 
 <script>
-document.addEventListener("DOMContentLoaded", function () {
+    document.addEventListener("DOMContentLoaded", function () {
 
-    var orderId = "{{ order.id }}";
-    var amount = "{{ order.amount }}";
-    var key = "{{ razorpay_key }}";
+        var orderId = "{{ order.id }}";
+        var amount = "{{ order.amount }}";
+        var key = "{{ razorpay_key }}";
 
-    if (!orderId || !key) {
-        alert("Payment configuration error.");
-        return;
-    }
-
-    var options = {
-        key: key,
-        amount: amount,
-        currency: "INR",
-        name: "FixPoint",
-        description: "Service Payment",
-        order_id: orderId,
-        handler: function (response) {
-            window.location.href = "{% url 'payment_success' %}?payment_id="
-                + response.razorpay_payment_id
-                + "&order_id=" + response.razorpay_order_id
-                + "&signature=" + response.razorpay_signature;
+        if (!orderId || !key) {
+            alert("Payment configuration error.");
+            return;
         }
-    };
 
-    var rzp1 = new Razorpay(options);
+        var options = {
+            key: key,
+            amount: amount,
+            currency: "INR",
+            name: "FixPoint",
+            description: "Service Payment",
+            order_id: orderId,
 
-    document.getElementById("rzp-button").onclick = function (e) {
-        rzp1.open();
-        e.preventDefault();
-    };
+            theme: {
+                color: "#C7902F"
+            },
 
-});
+            handler: function (response) {
+                window.location.href = "{% url 'payment_success' %}?payment_id="
+                    + response.razorpay_payment_id
+                    + "&order_id=" + response.razorpay_order_id
+                    + "&signature=" + response.razorpay_signature;
+            }
+        };
+
+        var rzp1 = new Razorpay(options);
+
+        document.getElementById("rzp-button").onclick = function (e) {
+            rzp1.open();
+            e.preventDefault();
+        };
+
+    });
 </script>
 
 {% endblock %}
