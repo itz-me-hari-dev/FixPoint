@@ -4,7 +4,7 @@ from django.utils.datastructures import MultiValueDictKeyError
 from django.core.files.storage import FileSystemStorage
 from AdminApp.models import *
 from django.contrib import messages
-from UserApp.models import ServiceProviderProfileDb
+from UserApp.models import UserDb,CustomerProfileDb,ServiceProviderProfileDb
 from django.contrib.auth import authenticate, login
 from django.contrib.auth import logout
 
@@ -183,8 +183,38 @@ def delete_customer_message(request, message_id):
     CustomerContactDb.objects.filter(id=message_id).delete()
     return redirect("admin_contact_messages")
 
-def delete_provider_message(request, message_id):
+def delete_service_provider_message(request, message_id):
     ServiceProviderContactDb.objects.filter(id=message_id).delete()
     return redirect("admin_contact_messages")
+
+def customers_details(request):
+
+    customers = UserDb.objects.filter(
+        user_role='CUSTOMER'
+    ).select_related('customerprofiledb')
+
+    context = {
+        "customers": customers
+    }
+
+    return render(request, "customers-details.html",context )
+
+def service_providers_details(request):
+
+    providers = UserDb.objects.filter(
+        user_role='SERVICE_PROVIDER'
+    ).select_related('serviceproviderprofiledb')
+
+    context = {
+        "providers": providers
+    }
+
+    return render(request, "service-providers-details.html", context)
+
+def delete_user(request, user_id):
+    user = get_object_or_404(UserDb, id=user_id)
+    user.delete()
+
+    return redirect(request.META.get('HTTP_REFERER', 'dashboard'))
 
 # user contact end
