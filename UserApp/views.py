@@ -10,6 +10,9 @@ from django.utils import timezone
 from django.db.models import Sum , Count
 import razorpay
 from django.conf import settings
+from django.contrib.auth.models import User
+from django.contrib.auth import login , authenticate , logout
+from django.contrib.auth.decorators import login_required
 
 
 # Create your views here.
@@ -34,10 +37,11 @@ def contact_page(request):
 def user_message_save(request):
 
     if request.method == "POST":
+
         form_type = request.POST.get("form_type")
 
-        if request.session.get("username"):
-            user = UserDb.objects.get(username=request.session["username"])
+        if request.user.is_authenticated:
+            user = get_object_or_404(UserDb, user=request.user)
         else:
             user = None
 
@@ -48,6 +52,7 @@ def user_message_save(request):
                 email=request.POST.get("cust_email"),
                 message=request.POST.get("cust_message"),
             )
+            messages.success(request, "Message sent successfully.")
 
         elif form_type == "provider":
             ServiceProviderContactDb.objects.create(
@@ -56,6 +61,7 @@ def user_message_save(request):
                 email=request.POST.get("provider_email"),
                 message=request.POST.get("provider_message"),
             )
+            messages.success(request, "Message sent successfully.")
 
     return redirect("contact_page")
 
@@ -66,38 +72,51 @@ def user_sign_up(request):
 
     if request.method == 'POST':
 
-        username =  request.POST.get("username")
+        username = request.POST.get("username")
         email = request.POST.get("email")
         password = request.POST.get("password")
         confirm_password = request.POST.get("confirm_password")
         user_role = request.POST.get("user_role")
 
-        # empty field check
+        # Empty field validation
         if not username or not email or not password or not confirm_password or not user_role:
-            return redirect(user_authentication)
+            messages.error(request, "All fields are required.")
+            return redirect("user_authentication")
 
-        if UserDb.objects.filter(username=username).exists():
-            return redirect(user_authentication)
+        # Check existing username/email in Django User
+        if User.objects.filter(username=username).exists():
+            messages.error(request, "Username already exists.")
+            return redirect("user_authentication")
 
-        if UserDb.objects.filter(email=email).exists():
-            return redirect(user_authentication)
+        if User.objects.filter(email=email).exists():
+            messages.error(request, "Email already exists.")
+            return redirect("user_authentication")
 
         if password != confirm_password:
-            return redirect(user_authentication)
+            messages.error(request, "Passwords do not match.")
+            return redirect("user_authentication")
 
-        is_approved = True if user_role == "CUSTOMER" else False
-
-        UserDb.objects.create(
+        # Create Django User (password automatically hashed)
+        django_user = User.objects.create_user(
             username=username,
             email=email,
-            password=password,
-            user_role=user_role,
-            is_approved=is_approved
+            password=password
         )
 
-        return redirect(user_authentication)
+        # Create your custom profile
+        UserDb.objects.create(
+            user=django_user,
+            user_role=user_role,
+            is_approved=True if user_role == "CUSTOMER" else False
+        )
 
-    return redirect(user_authentication)
+        login(request, django_user)  # auto login after signup
+
+        messages.success(request, "Registration successful.")
+
+        return redirect("home")
+
+    return redirect("user_authentication")
 
 def user_sign_in(request):
 
@@ -106,52 +125,59 @@ def user_sign_in(request):
         email_or_username = request.POST.get("email_or_username")
         password = request.POST.get("password")
 
-        if not email_or_username or not password :
-            return redirect(user_authentication)
+        if not email_or_username or not password:
+            messages.error(request, "All fields are required.")
+            return redirect("user_authentication")
 
-        user = UserDb.objects.filter(username=email_or_username).first()
+        # Try username login first
+        user = authenticate(request, username=email_or_username, password=password)
 
-        if not user:
-            user = UserDb.objects.filter(email=email_or_username).first()
+        # If not found, try email login
+        if user is None:
+            try:
+                user_obj = User.objects.get(email=email_or_username)
+                user = authenticate(request, username=user_obj.username, password=password)
+            except User.DoesNotExist:
+                user = None
 
-        if not user:
-            return redirect(user_authentication)
+        if user is not None:
 
-        if user.password != password:
-            return redirect(user_authentication)
+            login(request, user)
 
-        request.session["username"] = user.username
-        request.session["user_id"] = user.id
-        request.session["user_role"] = user.user_role
+            user_profile = UserDb.objects.get(user=user)
 
-        if request.session["user_role"] == 'SERVICE_PROVIDER':
-            return redirect(service_provider_dashboard)
+            if request.user.profile.user_role == "SERVICE_PROVIDER":
+                return redirect("service_provider_dashboard")
+            else:
+                return redirect("home")
 
-        elif request.session["user_role"] == 'CUSTOMER':
-            return redirect(home)
+        else:
+            messages.error(request, "Invalid username/email or password.")
+            return redirect("user_authentication")
 
+    return redirect("user_authentication")
 
-    return redirect(user_authentication)
-
+@login_required(login_url="user_authentication")
 def user_logout(request):
+    logout(request)
+    return redirect("home")
 
-    del request.session["username"]
-    del request.session["user_id"]
-    del request.session["user_role"]
-
-    return redirect(home)
-
+@login_required(login_url="user_authentication")
 def service_provider_dashboard(request):
 
-    if not request.session.get("username"):
-        return redirect("user_authentication")
+    user_profile = get_object_or_404(UserDb, user=request.user)
 
-    user = UserDb.objects.get(username=request.session["username"])
+    if request.user.profile.user_role != "SERVICE_PROVIDER":
+        messages.error(request, "Unauthorized access.")
+        return redirect("home")
 
-    try:
-        profile = ServiceProviderProfileDb.objects.get(user=user)
-    except ServiceProviderProfileDb.DoesNotExist:
-        profile = None
+    profile = ServiceProviderProfileDb.objects.filter(
+        user=user_profile
+    ).first()
+
+    if not profile:
+        messages.info(request, "Please complete your profile first.")
+        return redirect("manage_service_provider_profile")
 
     bookings = ServiceBookingDb.objects.filter(
         service_provider=profile
@@ -163,14 +189,12 @@ def service_provider_dashboard(request):
     current_month = today.month
     current_year = today.year
 
-    # Today Earnings (only paid jobs)
     today_earnings = bookings.filter(
         status="COMPLETED",
         payment__payment_status="SUCCESS",
         booking_date__date=today
     ).aggregate(total=Sum("total_amount"))["total"] or 0
 
-    # Monthly Earnings
     monthly_earnings = bookings.filter(
         status="COMPLETED",
         payment__payment_status="SUCCESS",
@@ -178,16 +202,13 @@ def service_provider_dashboard(request):
         booking_date__year=current_year
     ).aggregate(total=Sum("total_amount"))["total"] or 0
 
-    # Total Earnings (all time)
     total_earnings = bookings.filter(
         status="COMPLETED",
         payment__payment_status="SUCCESS"
     ).aggregate(total=Sum("total_amount"))["total"] or 0
 
-    # Total Jobs
     total_jobs = bookings.filter(status="COMPLETED").count()
 
-    # Total Hours Today
     total_hours_today = bookings.filter(
         status="COMPLETED",
         booking_date__date=today
@@ -212,25 +233,35 @@ def service_provider_dashboard(request):
 
     return render(request, "service-provider-dashboard.html", context)
 
+@login_required(login_url="user_authentication")
 def manage_service_provider_profile(request):
 
-    if not request.session.get("username"):
-        return redirect("user_login")
+    user_profile = get_object_or_404(UserDb, user=request.user)
+
+    if request.user.profile.user_role != "SERVICE_PROVIDER":
+        messages.error(request, "Unauthorized access.")
+        return redirect("home")
+
+    profile = ServiceProviderProfileDb.objects.filter(
+        user=user_profile
+    ).first()
 
     if request.method == "POST":
 
-        user = UserDb.objects.get(username=request.session["username"])
+        if not profile:
+            profile = ServiceProviderProfileDb(user=user_profile)
 
-        # try:
-        #     profile = ServiceProviderProfileDb.objects.get(user=user)
-        #     created = False
-        # except ServiceProviderProfileDb.DoesNotExist:
-        #     profile = ServiceProviderProfileDb(user=user)
-        #     created = True
+        new_email = request.POST.get("email")
 
-        profile , created = ServiceProviderProfileDb.objects.get_or_create(
-            user=user
-        )
+        if new_email and new_email != request.user.email:
+            from django.contrib.auth.models import User
+
+            if User.objects.filter(email=new_email).exclude(id=request.user.id).exists():
+                messages.error(request, "Email already exists.")
+                return redirect("manage_service_provider_profile")
+
+            request.user.email = new_email
+            request.user.save(update_fields=["email"])
 
         profile.full_name = request.POST.get("full_name")
         profile.phone_number = request.POST.get("phone_number")
@@ -254,44 +285,57 @@ def manage_service_provider_profile(request):
         if profile_photo:
             profile.profile_photo = profile_photo
 
-        # Reset approval only when updating
-        if not created:
+        if profile.pk:
             profile.approval_status = "PENDING"
             profile.rejection_reason = None
 
         profile.save()
 
+        messages.success(request, "Profile saved successfully.")
         return redirect("service_provider_dashboard")
 
-    return redirect("service_provider_dashboard")
+    return render(request, "service-provider-dashboard.html", {
+        "profile": profile
+    })
 
+@login_required(login_url="user_authentication")
 def toggle_availability(request):
 
-    if not request.session.get("username"):
-        return redirect("user_login")
+    user_profile = get_object_or_404(UserDb, user=request.user)
 
-    user = UserDb.objects.get(username=request.session["username"])
+    # Role protection
+    if request.user.profile.user_role != "SERVICE_PROVIDER":
+        messages.error(request, "Unauthorized access.")
+        return redirect("home")
 
     try:
-        profile = ServiceProviderProfileDb.objects.get(user=user)
+        profile = ServiceProviderProfileDb.objects.get(user=user_profile)
 
         profile.is_available = not profile.is_available
         profile.save()
 
+        if profile.is_available:
+            messages.success(request, "You are now marked as Available.")
+        else:
+            messages.warning(request, "You are now marked as Unavailable.")
+
     except ServiceProviderProfileDb.DoesNotExist:
-        pass
+        messages.error(request, "Profile not found.")
 
     return redirect("service_provider_dashboard")
 
+@login_required(login_url="user_authentication")
 def customer_dashboard(request):
 
-    if not request.session.get("username"):
-        return redirect("user_login")
+    # Get your custom user profile
+    user_profile = get_object_or_404(UserDb, user=request.user)
 
-    user = UserDb.objects.get(username=request.session["username"])
+    # Role protection
+    if request.user.profile.user_role != "CUSTOMER":
+        return redirect("home")
 
     try:
-        profile = CustomerProfileDb.objects.get(user=user)
+        profile = CustomerProfileDb.objects.get(user=user_profile)
     except CustomerProfileDb.DoesNotExist:
         profile = None
 
@@ -304,7 +348,7 @@ def customer_dashboard(request):
             customer=profile
         ).count()
 
-        # Only count successful payments
+        # Only successful payments
         total_spent = PaymentDb.objects.filter(
             booking__customer=profile,
             payment_status="SUCCESS"
@@ -321,7 +365,6 @@ def customer_dashboard(request):
 
     context = {
         "profile": profile,
-        "user": user,
         "total_bookings": total_bookings,
         "total_spent": total_spent,
         "bookings": bookings,
@@ -329,18 +372,32 @@ def customer_dashboard(request):
 
     return render(request, "customer-dashboard.html", context)
 
+@login_required(login_url="user_authentication")
 def manage_customer_profile(request):
 
-    if not request.session.get("username"):
-        return redirect("user_authentication")
+    user_profile = get_object_or_404(UserDb, user=request.user)
 
-    user = UserDb.objects.get(username=request.session["username"])
+    if request.user.profile.user_role != "CUSTOMER":
+        messages.error(request, "Unauthorized access.")
+        return redirect("home")
 
     profile, created = CustomerProfileDb.objects.get_or_create(
-        user=user
+        user=user_profile
     )
 
     if request.method == "POST":
+
+        new_email = request.POST.get("email")
+
+        if new_email and new_email != request.user.email:
+            from django.contrib.auth.models import User
+
+            if User.objects.filter(email=new_email).exclude(id=request.user.id).exists():
+                messages.error(request, "Email already exists.")
+                return redirect("manage_customer_profile")
+
+            request.user.email = new_email
+            request.user.save(update_fields=["email"])
 
         profile.full_name = request.POST.get("full_name")
         profile.phone_number = request.POST.get("phone_number")
@@ -354,10 +411,11 @@ def manage_customer_profile(request):
 
         profile.save()
 
-        if not user.is_approved:
-            user.is_approved = True
-            user.save(update_fields=["is_approved"])
+        if not user_profile.is_approved:
+            user_profile.is_approved = True
+            user_profile.save(update_fields=["is_approved"])
 
+        messages.success(request, "Profile updated successfully.")
         return redirect("customer_dashboard")
 
     return redirect("customer_dashboard")
@@ -375,13 +433,22 @@ def calculate_distance(lat1, lon1, lat2, lon2):
     c = 2 * math.atan2(math.sqrt(a), math.sqrt(1 - a))
     return round(R * c, 2)
 
+@login_required(login_url="user_authentication")
 def customer_service_post_page(request):
 
-    if not request.session.get("username"):
-        return redirect("user_authentication")
+    # Get custom user profile
+    user_profile = get_object_or_404(UserDb, user=request.user)
 
-    user = UserDb.objects.get(username=request.session["username"])
-    customer_profile = CustomerProfileDb.objects.get(user=user)
+    # Role protection
+    if request.user.profile.user_role != "CUSTOMER":
+        messages.error(request, "Unauthorized access.")
+        return redirect("home")
+
+    try:
+        customer_profile = CustomerProfileDb.objects.get(user=user_profile)
+    except CustomerProfileDb.DoesNotExist:
+        messages.warning(request, "Please complete your profile first.")
+        return redirect("customer_dashboard")
 
     service_categories = ServiceCategoryDb.objects.all()
 
@@ -391,22 +458,22 @@ def customer_service_post_page(request):
         approval_status="APPROVED"
     )
 
-    #Get selected category from GET
+    # Get selected category
     selected_category = request.GET.get("category")
 
     if selected_category:
-        # Because your service_type is stored as string
         category_obj = ServiceCategoryDb.objects.filter(id=selected_category).first()
         if category_obj:
             service_post = service_post.filter(
                 service_type=category_obj.category_name
             )
 
-    #Calculate distance
+    # Calculate distance
     for provider in service_post:
-        if (provider.latitude and provider.longitude and
-            customer_profile.latitude and customer_profile.longitude):
-
+        if (
+            provider.latitude and provider.longitude and
+            customer_profile.latitude and customer_profile.longitude
+        ):
             provider.distance = calculate_distance(
                 float(customer_profile.latitude),
                 float(customer_profile.longitude),
@@ -424,21 +491,31 @@ def customer_service_post_page(request):
 
     return render(request, "customer-service-post-page.html", context)
 
+@login_required(login_url="user_authentication")
 def provider_profile_view(request, provider_id):
 
-    if not request.session.get("username"):
-        return redirect("user_authentication")
+    # Get custom user profile
+    user_profile = get_object_or_404(UserDb, user=request.user)
 
-    user = UserDb.objects.get(username=request.session["username"])
-    customer_profile = CustomerProfileDb.objects.get(user=user)
+    # Only customers can view provider details
+    if request.user.profile.user_role != "CUSTOMER":
+        messages.error(request, "Unauthorized access.")
+        return redirect("home")
+
+    try:
+        customer_profile = CustomerProfileDb.objects.get(user=user_profile)
+    except CustomerProfileDb.DoesNotExist:
+        messages.warning(request, "Please complete your profile first.")
+        return redirect("customer_dashboard")
 
     provider = get_object_or_404(ServiceProviderProfileDb, id=provider_id)
 
     distance = None
 
-    if (provider.latitude and provider.longitude and
-        customer_profile.latitude and customer_profile.longitude):
-
+    if (
+        provider.latitude and provider.longitude and
+        customer_profile.latitude and customer_profile.longitude
+    ):
         distance = calculate_distance(
             float(customer_profile.latitude),
             float(customer_profile.longitude),
@@ -453,13 +530,21 @@ def provider_profile_view(request, provider_id):
 
     return render(request, "provider-profile-view.html", context)
 
+@login_required(login_url="user_authentication")
 def provider_start_job(request, booking_id):
 
-    if not request.session.get("username"):
-        return redirect("user_authentication")
+    # Get custom user profile
+    user_profile = get_object_or_404(UserDb, user=request.user)
 
-    user = UserDb.objects.get(username=request.session["username"])
-    provider_profile = get_object_or_404(ServiceProviderProfileDb, user=user)
+    # Role protection
+    if request.user.profile.user_role != "SERVICE_PROVIDER":
+        messages.error(request, "Unauthorized access.")
+        return redirect("home")
+
+    provider_profile = get_object_or_404(
+        ServiceProviderProfileDb,
+        user=user_profile
+    )
 
     booking = get_object_or_404(
         ServiceBookingDb,
@@ -471,7 +556,7 @@ def provider_start_job(request, booking_id):
         messages.error(request, "Job cannot be started.")
         return redirect("service_provider_dashboard")
 
-    # Calculate travel distance here
+    # Calculate travel distance
     if (
         provider_profile.latitude and provider_profile.longitude and
         booking.customer.latitude and booking.customer.longitude
@@ -494,13 +579,21 @@ def provider_start_job(request, booking_id):
 
     return redirect("service_provider_dashboard")
 
+@login_required(login_url="user_authentication")
 def provider_stop_job(request, booking_id):
 
-    if not request.session.get("username"):
-        return redirect("user_authentication")
+    # Get custom user profile
+    user_profile = get_object_or_404(UserDb, user=request.user)
 
-    user = UserDb.objects.get(username=request.session["username"])
-    provider_profile = get_object_or_404(ServiceProviderProfileDb, user=user)
+    # Role protection
+    if request.user.profile.user_role != "SERVICE_PROVIDER":
+        messages.error(request, "Unauthorized access.")
+        return redirect("home")
+
+    provider_profile = get_object_or_404(
+        ServiceProviderProfileDb,
+        user=user_profile
+    )
 
     booking = get_object_or_404(
         ServiceBookingDb,
@@ -551,15 +644,35 @@ def provider_stop_job(request, booking_id):
 
     return redirect("service_provider_dashboard")
 
+@login_required(login_url="user_authentication")
 def create_booking(request, provider_id):
 
-    if not request.session.get("username"):
-        return redirect("user_authentication")
+    # Get custom user profile
+    user_profile = get_object_or_404(UserDb, user=request.user)
 
-    user = UserDb.objects.get(username=request.session["username"])
-    customer_profile = CustomerProfileDb.objects.get(user=user)
+    # Role protection
+    if request.user.profile.user_role != "CUSTOMER":
+        messages.error(request, "Unauthorized access.")
+        return redirect("home")
+
+    try:
+        customer_profile = CustomerProfileDb.objects.get(user=user_profile)
+    except CustomerProfileDb.DoesNotExist:
+        messages.warning(request, "Please complete your profile first.")
+        return redirect("customer_dashboard")
 
     provider = get_object_or_404(ServiceProviderProfileDb, id=provider_id)
+
+    # Optional: Prevent duplicate pending booking
+    existing_booking = ServiceBookingDb.objects.filter(
+        customer=customer_profile,
+        service_provider=provider,
+        status="PENDING"
+    ).exists()
+
+    if existing_booking:
+        messages.warning(request, "You already have a pending booking with this provider.")
+        return redirect("customer_dashboard")
 
     ServiceBookingDb.objects.create(
         customer=customer_profile,
@@ -571,24 +684,93 @@ def create_booking(request, provider_id):
     messages.success(request, "Booking request sent successfully.")
     return redirect("customer_dashboard")
 
+@login_required(login_url="user_authentication")
 def accept_booking(request, booking_id):
-    booking = get_object_or_404(ServiceBookingDb, id=booking_id)
+
+    user_profile = get_object_or_404(UserDb, user=request.user)
+
+    # Role protection
+    if request.user.profile.user_role != "SERVICE_PROVIDER":
+        messages.error(request, "Unauthorized access.")
+        return redirect("home")
+
+    provider_profile = get_object_or_404(
+        ServiceProviderProfileDb,
+        user=user_profile
+    )
+
+    booking = get_object_or_404(
+        ServiceBookingDb,
+        id=booking_id,
+        service_provider=provider_profile
+    )
+
+    if booking.status != "PENDING":
+        messages.warning(request, "Booking cannot be accepted.")
+        return redirect("service_provider_dashboard")
+
     booking.status = "ACCEPTED"
     booking.save()
+
+    messages.success(request, "Booking accepted successfully.")
+
     return redirect("service_provider_dashboard")
 
+@login_required(login_url="user_authentication")
 def reject_booking(request, booking_id):
-    booking = get_object_or_404(ServiceBookingDb, id=booking_id)
+
+    user_profile = get_object_or_404(UserDb, user=request.user)
+
+    # Role protection
+    if request.user.profile.user_role != "SERVICE_PROVIDER":
+        messages.error(request, "Unauthorized access.")
+        return redirect("home")
+
+    provider_profile = get_object_or_404(
+        ServiceProviderProfileDb,
+        user=user_profile
+    )
+
+    booking = get_object_or_404(
+        ServiceBookingDb,
+        id=booking_id,
+        service_provider=provider_profile
+    )
+
+    if booking.status != "PENDING":
+        messages.warning(request, "Booking cannot be rejected.")
+        return redirect("service_provider_dashboard")
+
     booking.status = "CANCELLED"
     booking.save()
+
+    messages.success(request, "Booking rejected successfully.")
+
     return redirect("service_provider_dashboard")
 
+@login_required(login_url="user_authentication")
 def create_payment(request, booking_id):
 
-    if not request.session.get("username"):
-        return redirect("user_authentication")
+    user_profile = get_object_or_404(UserDb, user=request.user)
 
-    booking = get_object_or_404(ServiceBookingDb, id=booking_id)
+    # Role protection
+    if request.user.profile.user_role != "CUSTOMER":
+        messages.error(request, "Unauthorized access.")
+        return redirect("home")
+
+    # Get customer profile
+    try:
+        customer_profile = CustomerProfileDb.objects.get(user=user_profile)
+    except CustomerProfileDb.DoesNotExist:
+        messages.warning(request, "Please complete your profile first.")
+        return redirect("customer_dashboard")
+
+    # Ensure booking belongs to this customer
+    booking = get_object_or_404(
+        ServiceBookingDb,
+        id=booking_id,
+        customer=customer_profile
+    )
 
     # Allow only completed jobs
     if booking.status != "COMPLETED":
@@ -598,29 +780,24 @@ def create_payment(request, booking_id):
     # Check existing payment
     existing_payment = PaymentDb.objects.filter(booking=booking).first()
 
-    # If already paid → block
     if existing_payment and existing_payment.payment_status == "SUCCESS":
         messages.error(request, "Payment already completed.")
         return redirect("customer_dashboard")
 
-    # If pending → delete and recreate
     if existing_payment and existing_payment.payment_status == "PENDING":
         existing_payment.delete()
 
     # -----------------------------
-    # Billing Breakdown Calculation
+    # Billing Calculation
     # -----------------------------
 
-    # Convert total_time safely to Decimal
     total_time_decimal = Decimal(str(booking.total_time))
 
-    # Work charge
     work_charge = (
         total_time_decimal *
         booking.service_provider.hourly_rate
     ).quantize(Decimal("0.01"))
 
-    # Travel charge
     travel_charge = Decimal("0.00")
 
     if booking.travel_distance:
@@ -629,11 +806,10 @@ def create_payment(request, booking_id):
             Decimal("10")
         ).quantize(Decimal("0.01"))
 
-    # Final amount
     final_amount = (work_charge + travel_charge).quantize(Decimal("0.01"))
 
     # -----------------------------
-    # Razorpay Order Creation
+    # Razorpay Order
     # -----------------------------
 
     client = razorpay.Client(
@@ -648,7 +824,6 @@ def create_payment(request, booking_id):
         "payment_capture": 1
     })
 
-    # Save payment record
     PaymentDb.objects.create(
         booking=booking,
         razorpay_order_id=order["id"],
@@ -667,19 +842,57 @@ def create_payment(request, booking_id):
 
     return render(request, "payment-page.html", context)
 
+@login_required(login_url="user_authentication")
 def payment_success(request):
+
+    user_profile = get_object_or_404(UserDb, user=request.user)
+
+    # Only customers can access
+    if request.user.profile.user_role != "CUSTOMER":
+        messages.error(request, "Unauthorized access.")
+        return redirect("home")
 
     payment_id = request.GET.get("payment_id")
     order_id = request.GET.get("order_id")
     signature = request.GET.get("signature")
 
-    payment = PaymentDb.objects.get(razorpay_order_id=order_id)
+    # Safety validation
+    if not payment_id or not order_id or not signature:
+        messages.error(request, "Invalid payment response.")
+        return redirect("customer_dashboard")
 
-    payment.razorpay_payment_id = payment_id
-    payment.razorpay_signature = signature
-    payment.payment_status = "SUCCESS"
-    payment.save()
+    payment = get_object_or_404(
+        PaymentDb,
+        razorpay_order_id=order_id,
+        booking__customer__user=user_profile
+    )
 
-    messages.success(request, "Payment Successful!")
+    # Prevent double success update
+    if payment.payment_status == "SUCCESS":
+        messages.info(request, "Payment already verified.")
+        return redirect("customer_dashboard")
+
+    client = razorpay.Client(
+        auth=(settings.RAZORPAY_KEY_ID, settings.RAZORPAY_KEY_SECRET)
+    )
+
+    try:
+        client.utility.verify_payment_signature({
+            "razorpay_order_id": order_id,
+            "razorpay_payment_id": payment_id,
+            "razorpay_signature": signature
+        })
+
+        payment.razorpay_payment_id = payment_id
+        payment.razorpay_signature = signature
+        payment.payment_status = "SUCCESS"
+        payment.save()
+
+        messages.success(request, "Payment Successful!")
+
+    except razorpay.errors.SignatureVerificationError:
+        payment.payment_status = "FAILED"
+        payment.save()
+        messages.error(request, "Payment verification failed.")
 
     return redirect("customer_dashboard")

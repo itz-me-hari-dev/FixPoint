@@ -185,7 +185,7 @@
                                     <div class="border rounded-3 p-3 shadow-sm h-100 bg-white">
                                         <small class="text-muted d-block">Email</small>
                                         <strong class="text-break">
-                                            {{ user.email }}
+                                            {{ request.user.email }}
                                         </strong>
                                     </div>
                                 </div>
@@ -221,15 +221,34 @@
                             {% csrf_token %}
 
                             <div class="row g-3">
+
+                                <!-- FULL NAME -->
                                 <div class="col-md-6">
                                     <label class="form-label">Full Name</label>
-                                    <input class="form-control" name="full_name" value="{{ profile.full_name }}"
+                                    <input type="text"
+                                        class="form-control"
+                                        name="full_name"
+                                        value="{{ profile.full_name }}"
                                         required>
                                 </div>
 
+                                <!-- EMAIL -->
+                                <div class="col-md-6">
+                                    <label class="form-label">Email</label>
+                                    <input type="email"
+                                        class="form-control"
+                                        name="email"
+                                        value="{{ request.user.email }}"
+                                        required>
+                                </div>
+
+                                <!-- PHONE -->
                                 <div class="col-md-6">
                                     <label class="form-label">Phone</label>
-                                    <input class="form-control" name="phone_number" value="{{ profile.phone_number }}"
+                                    <input type="text"
+                                        class="form-control"
+                                        name="phone_number"
+                                        value="{{ profile.phone_number }}"
                                         required>
                                 </div>
 
@@ -241,28 +260,39 @@
                                     <!-- Input + Button -->
                                     <div class="row g-2">
                                         <div class="col-md-8">
-                                            <input type="text" class="form-control" id="customer_location"
-                                                name="location" value="{{ profile.location }}" required>
+                                            <input type="text"
+                                                class="form-control"
+                                                id="customer_location"
+                                                name="location"
+                                                value="{{ profile.location }}"
+                                                required>
                                         </div>
 
                                         <div class="col-md-4">
-                                            <button type="button" class="btn btn-outline-primary w-100"
-                                                onclick="getCustomerCurrentLocation()">
+                                            <button type="button"
+                                                    class="btn btn-outline-primary w-100"
+                                                    onclick="getCustomerCurrentLocation()">
                                                 Use Current Location
                                             </button>
                                         </div>
                                     </div>
 
                                     <!-- Hidden Latitude & Longitude -->
-                                    <input type="hidden" id="customer_latitude" name="latitude"
+                                    <input type="hidden"
+                                        id="customer_latitude"
+                                        name="latitude"
                                         value="{{ profile.latitude }}">
 
-                                    <input type="hidden" id="customer_longitude" name="longitude"
+                                    <input type="hidden"
+                                        id="customer_longitude"
+                                        name="longitude"
                                         value="{{ profile.longitude }}">
 
                                     <!-- Map -->
                                     <div class="mt-3">
-                                        <div id="customer_map" class="rounded border shadow-sm" style="height:300px;">
+                                        <div id="customer_map"
+                                            class="rounded border shadow-sm"
+                                            style="height:300px;">
                                         </div>
                                     </div>
 
@@ -270,16 +300,20 @@
 
                             </div>
 
+                            <!-- BUTTONS -->
                             <div class="mt-4 d-flex gap-2">
                                 <button type="submit" class="btn btn-primary">
                                     <i class="fa fa-save me-2"></i>
                                     Save Changes
                                 </button>
 
-                                <button type="button" class="btn btn-secondary" onclick="cancelEdit()">
+                                <button type="button"
+                                        class="btn btn-secondary"
+                                        onclick="cancelEdit()">
                                     Cancel
                                 </button>
                             </div>
+
                         </form>
 
                     </div>

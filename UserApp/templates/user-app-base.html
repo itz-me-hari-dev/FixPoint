@@ -100,16 +100,17 @@
                         </div> -->
                         <a href="{% url 'contact_page' %}" class="nav-item nav-link
                         {% if request.resolver_match.url_name == 'contact_page' %}active{% endif %}">Contact</a>
-                        {% if request.session.username %}
+                        {% if request.user.is_authenticated %}
                         <div class="nav-item dropdown">
-                            <a href="#" class="nav-link dropdown-toggle
-                            {% if request.resolver_match.url_name == 'customer_dashboard' or request.resolver_match.url_name == 'service_provider_dashboard' %}active{% endif %}" 
-                               data-bs-toggle="dropdown">
-                                {{ request.session.username }}</a>
+                            <a href="#"
+                                class="nav-link dropdown-toggle
+                            {% if request.resolver_match.url_name == 'customer_dashboard' or request.resolver_match.url_name == 'service_provider_dashboard' %}active{% endif %}"
+                                data-bs-toggle="dropdown">
+                                {{ request.user.username }}</a>
                             <div class="dropdown-menu bg-light rounded-0 rounded-bottom m-0">
-                                {% if request.session.user_role == 'CUSTOMER' %}
+                                {% if request.user.profile.user_role == 'CUSTOMER' %}
                                 <a href="{% url 'customer_dashboard' %}" class="dropdown-item">Dashboard</a>
-                                {% elif request.session.user_role == 'SERVICE_PROVIDER' %}
+                                {% elif request.user.profile.user_role == 'SERVICE_PROVIDER' %}
                                 <a href="{% url 'service_provider_dashboard' %}" class="dropdown-item">Dashboard</a>
                                 {% endif %}
                                 <a href="{% url 'user_logout' %}" class="dropdown-item">Logout</a>
@@ -124,6 +125,25 @@
         </div>
     </div>
     <!-- Navbar End -->
+
+    {% if messages %}
+    <div class="container mt-3">
+        {% for message in messages %}
+        <div class="alert 
+        {% if message.tags == 'error' %}alert-danger
+        {% elif message.tags == 'success' %}alert-success
+        {% elif message.tags == 'warning' %}alert-warning
+        {% else %}alert-info
+        {% endif %}
+        alert-dismissible fade show" role="alert">
+
+            {{ message }}
+
+            <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+        </div>
+        {% endfor %}
+    </div>
+    {% endif %}
 
     {% block content %}
     {% endblock %}
@@ -222,6 +242,7 @@
 
     <!-- Template Javascript -->
     <script src="{% static 'user_app_assets/js/main.js' %}"></script>
+
 </body>
 
 </html>

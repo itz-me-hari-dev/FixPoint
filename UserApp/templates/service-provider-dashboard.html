@@ -350,7 +350,7 @@
                                 <div class="border rounded p-3 h-100">
                                     <small class="text-muted d-block">Email</small>
                                     <strong class="text-break">
-                                        {{ profile.user.email }}
+                                        {{ request.user.email }}
                                     </strong>
                                 </div>
                             </div>
@@ -447,7 +447,7 @@
                                 <div class="col-md-6">
                                     <label class="form-label">Email</label>
                                     <input type="email" class="form-control" name="email"
-                                        value="{{ profile.user.email }}" required>
+                                        value="{{ request.user.email }}" required>
                                 </div>
 
                                 <!-- PHONE NUMBER -->

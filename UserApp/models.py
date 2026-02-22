@@ -1,5 +1,7 @@
 from django.db import models
+from django.contrib.auth.models import User
 # Create your models here.
+
 
 class UserDb(models.Model):
 
@@ -8,11 +10,22 @@ class UserDb(models.Model):
         ('CUSTOMER', 'Customer'),
     )
 
-    username = models.CharField(max_length=100, unique=True)
-    email = models.EmailField(unique=True)
-    password = models.CharField(max_length=255)
-    user_role = models.CharField(max_length=20,choices=ROLE_CHOICES)
+    # Link to Django User (NO null anymore after migration)
+    user = models.OneToOneField(
+        User,
+        on_delete=models.CASCADE,
+        related_name="profile"
+    )
+
+    user_role = models.CharField(
+        max_length=20,
+        choices=ROLE_CHOICES
+    )
+
     is_approved = models.BooleanField(default=False)
+
+    def __str__(self):
+        return self.user.username
 
 class ServiceProviderProfileDb(models.Model):
 
@@ -28,7 +41,7 @@ class ServiceProviderProfileDb(models.Model):
     phone_number = models.CharField(max_length=15, null=True, blank=True)
 
     service_type = models.CharField(max_length=100)
-    experience = models.PositiveIntegerField()
+    experience = models.PositiveIntegerField(default=0)
     hourly_rate = models.DecimalField(
         max_digits=8,
         decimal_places=2
