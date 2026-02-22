@@ -818,7 +818,6 @@
             <!-- EARNINGS -->
             <div id="earnings" class="section d-none">
 
-                <!-- INFO STRIP -->
                 <div class="alert alert-secondary mb-4">
                     <i class="fa fa-wallet me-2"></i>
                     Track your income and performance here.
@@ -831,7 +830,6 @@
                         Earnings Overview
                     </h5>
 
-                    <!-- EARNINGS CARDS -->
                     <div class="row g-4 mb-4">
 
                         <!-- TODAY -->
@@ -839,7 +837,9 @@
                             <div class="border rounded p-4 text-center h-100">
                                 <i class="fa fa-calendar-day fa-2x text-primary mb-2"></i>
                                 <h6 class="mb-1">Today</h6>
-                                <h4 class="text-primary mb-0">₹0</h4>
+                                <h4 class="text-primary mb-0">
+                                    ₹{{ today_earnings|floatformat:2}}
+                                </h4>
                                 <small class="text-muted">Earnings today</small>
                             </div>
                         </div>
@@ -849,7 +849,9 @@
                             <div class="border rounded p-4 text-center h-100">
                                 <i class="fa fa-calendar-alt fa-2x text-primary mb-2"></i>
                                 <h6 class="mb-1">This Month</h6>
-                                <h4 class="text-primary mb-0">₹12,500</h4>
+                                <h4 class="text-primary mb-0">
+                                    ₹{{ monthly_earnings|floatformat:2 }}
+                                </h4>
                                 <small class="text-muted">Monthly earnings</small>
                             </div>
                         </div>
@@ -859,17 +861,18 @@
                             <div class="border rounded p-4 text-center h-100">
                                 <i class="fa fa-coins fa-2x text-primary mb-2"></i>
                                 <h6 class="mb-1">Total Earned</h6>
-                                <h4 class="text-primary mb-0">₹48,200</h4>
+                                <h4 class="text-primary mb-0">
+                                    ₹{{ total_earnings|floatformat:2 }}
+                                </h4>
                                 <small class="text-muted">All-time earnings</small>
                             </div>
                         </div>
 
                     </div>
 
-                    <!-- BREAKDOWN -->
                     <div class="row g-4">
 
-                        <!-- HOURS SUMMARY -->
+                        <!-- WORK SUMMARY -->
                         <div class="col-md-6">
                             <div class="border rounded p-4 h-100">
                                 <h6 class="mb-3">
@@ -878,20 +881,25 @@
                                 </h6>
 
                                 <p class="mb-2">
-                                    <strong>Total Jobs:</strong> 24
+                                    <strong>Total Jobs:</strong> {{ total_jobs }}
                                 </p>
 
                                 <p class="mb-2">
-                                    <strong>Total Hours Worked:</strong> 86 hrs
+                                    <strong>Total Hours Today:</strong> {{ total_hours_today|default:0 }} hrs
                                 </p>
 
                                 <p class="mb-0">
-                                    <strong>Average per Job:</strong> ₹2,008
+                                    <strong>Last Job:</strong>
+                                    {% if last_job %}
+                                        ₹{{ last_job.total_amount }}
+                                    {% else %}
+                                        No completed jobs
+                                    {% endif %}
                                 </p>
                             </div>
                         </div>
 
-                        <!-- QUICK ACTIONS -->
+                        <!-- ACTIONS -->
                         <div class="col-md-6">
                             <div class="border rounded p-4 h-100">
                                 <h6 class="mb-3">
@@ -900,15 +908,18 @@
                                 </h6>
 
                                 <div class="d-grid gap-2">
-                                    <button class="btn btn-outline-primary">
+                                    <button type="button"
+                                        class="btn btn-outline-primary"
+                                        onclick="showSection('history', this)">
                                         <i class="fa fa-history me-2"></i>
                                         View Job History
                                     </button>
 
-                                    <button class="btn btn-outline-secondary">
+                                    <a href="#"
+                                    class="btn btn-outline-secondary">
                                         <i class="fa fa-file-invoice me-2"></i>
                                         Download Statement
-                                    </button>
+                                    </a>
                                 </div>
                             </div>
                         </div>
