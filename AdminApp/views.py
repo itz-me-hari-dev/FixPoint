@@ -11,7 +11,28 @@ from django.contrib.auth import logout
 # Create your views here.
 
 def dashboard(request):
-    return render(request,"dashboard.html")
+
+    total_customers = UserDb.objects.filter(user_role="CUSTOMER").count()
+    total_providers = UserDb.objects.filter(user_role="SERVICE_PROVIDER").count()
+    total_categories = ServiceCategoryDb.objects.count()
+
+    total_customer_messages = CustomerContactDb.objects.count()
+    total_provider_messages = ServiceProviderContactDb.objects.count()
+
+    recent_customer_messages = CustomerContactDb.objects.order_by("-created_at")[:5]
+    recent_provider_messages = ServiceProviderContactDb.objects.order_by("-created_at")[:5]
+
+    context = {
+        "total_customers": total_customers,
+        "total_providers": total_providers,
+        "total_categories": total_categories,
+        "total_customer_messages": total_customer_messages,
+        "total_provider_messages": total_provider_messages,
+        "recent_customer_messages": recent_customer_messages,
+        "recent_provider_messages": recent_provider_messages,
+    }
+
+    return render(request, "dashboard.html", context)
 
 def admin_login(request):
 
