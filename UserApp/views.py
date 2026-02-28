@@ -13,6 +13,13 @@ from django.conf import settings
 from django.contrib.auth.models import User
 from django.contrib.auth import login , authenticate , logout
 from django.contrib.auth.decorators import login_required
+from UserApp.notifications import (
+    notify_booking_created,
+    notify_booking_status_updated,
+    notify_contact_message,
+    notify_job_completed,
+    notify_payment_success,
+)
 
 
 # Create your views here.
@@ -52,11 +59,23 @@ def user_message_save(request):
                 email=request.POST.get("cust_email"),
                 message=request.POST.get("cust_message"),
             )
+            notify_contact_message(
+                form_type="customer",
+                full_name=request.POST.get("cust_name"),
+                email=request.POST.get("cust_email"),
+                message=request.POST.get("cust_message"),
+            )
             messages.success(request, "Message sent successfully.")
 
         elif form_type == "provider":
             ServiceProviderContactDb.objects.create(
                 user=user,
+                full_name=request.POST.get("provider_name"),
+                email=request.POST.get("provider_email"),
+                message=request.POST.get("provider_message"),
+            )
+            notify_contact_message(
+                form_type="service provider",
                 full_name=request.POST.get("provider_name"),
                 email=request.POST.get("provider_email"),
                 message=request.POST.get("provider_message"),
@@ -639,6 +658,7 @@ def provider_stop_job(request, booking_id):
 
     booking.status = "COMPLETED"
     booking.save()
+    notify_job_completed(booking)
 
     messages.success(request, "Job completed successfully.")
 
@@ -674,12 +694,13 @@ def create_booking(request, provider_id):
         messages.warning(request, "You already have a pending booking with this provider.")
         return redirect("customer_dashboard")
 
-    ServiceBookingDb.objects.create(
+    booking = ServiceBookingDb.objects.create(
         customer=customer_profile,
         service_provider=provider,
         service_type=provider.service_type,
         status="PENDING"
     )
+    notify_booking_created(booking)
 
     messages.success(request, "Booking request sent successfully.")
     return redirect("customer_dashboard")
@@ -711,6 +732,7 @@ def accept_booking(request, booking_id):
 
     booking.status = "ACCEPTED"
     booking.save()
+    notify_booking_status_updated(booking)
 
     messages.success(request, "Booking accepted successfully.")
 
@@ -743,6 +765,7 @@ def reject_booking(request, booking_id):
 
     booking.status = "CANCELLED"
     booking.save()
+    notify_booking_status_updated(booking)
 
     messages.success(request, "Booking rejected successfully.")
 
@@ -887,6 +910,7 @@ def payment_success(request):
         payment.razorpay_signature = signature
         payment.payment_status = "SUCCESS"
         payment.save()
+        notify_payment_success(payment)
 
         messages.success(request, "Payment Successful!")
 

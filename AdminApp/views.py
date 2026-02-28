@@ -7,6 +7,7 @@ from django.contrib import messages
 from UserApp.models import UserDb,CustomerProfileDb,ServiceProviderProfileDb
 from django.contrib.auth import authenticate, login
 from django.contrib.auth import logout
+from UserApp.notifications import notify_provider_approval
 
 # Create your views here.
 
@@ -158,6 +159,7 @@ def approve_provider(request, provider_id):
     provider.approval_status = 'APPROVED'
     provider.rejection_reason = ""
     provider.save()
+    notify_provider_approval(provider, is_approved=True)
 
     messages.success(request, "Service Provider Approved Successfully!")
 
@@ -179,6 +181,7 @@ def reject_provider(request, provider_id):
     provider.approval_status = 'REJECTED'
     provider.rejection_reason = "Rejected by admin"
     provider.save()
+    notify_provider_approval(provider, is_approved=False)
 
     messages.warning(request, "Service Provider Rejected!")
 
