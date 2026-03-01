@@ -8,9 +8,21 @@ from UserApp.models import UserDb,CustomerProfileDb,ServiceProviderProfileDb
 from django.contrib.auth import authenticate, login
 from django.contrib.auth import logout
 from UserApp.notifications import notify_provider_approval
+from functools import wraps
 
 # Create your views here.
 
+def admin_required(view_func):
+    @wraps(view_func)
+    def _wrapped_view(request, *args, **kwargs):
+        if not request.user.is_authenticated:
+            return redirect("admin_login")
+        if not request.user.is_superuser:
+            return HttpResponseForbidden("Not allowed")
+        return view_func(request, *args, **kwargs)
+    return _wrapped_view
+
+@admin_required
 def dashboard(request):
 
     total_customers = UserDb.objects.filter(user_role="CUSTOMER").count()
@@ -58,9 +70,11 @@ def admin_logout(request):
 
 # Category-View-Start
 
+@admin_required
 def add_service_category_form_page(request):
     return render(request,"add-service-category-page.html")
 
+@admin_required
 def save_service_category(request):
 
     if request.method == 'POST':
@@ -79,6 +93,7 @@ def save_service_category(request):
 
         return redirect(add_service_category_form_page)
 
+@admin_required
 def display_service_categories_page(request):
     service_categories = ServiceCategoryDb.objects.all()
     context ={
@@ -86,10 +101,12 @@ def display_service_categories_page(request):
     }
     return render(request,"display-service-categories-page.html",context)
 
+@admin_required
 def edit_service_category_page(request,category_id):
     category = ServiceCategoryDb.objects.get(id=category_id)
     return render(request,"edit-service-category-page.html",{"category":category})
 
+@admin_required
 def update_service_category(request,category_id):
 
     if request.method == 'POST':
@@ -116,6 +133,7 @@ def update_service_category(request,category_id):
 
         return redirect(display_service_categories_page)
 
+@admin_required
 def delete_service_category(request,category_id):
     ServiceCategoryDb.objects.filter(id=category_id).delete()
     return redirect(display_service_categories_page)
@@ -126,16 +144,8 @@ def delete_service_category(request,category_id):
 
 # Service Provider Approve/Reject code start
 
+@admin_required
 def display_service_providers_for_approval_page(request):
-
-    # Check login
-    if not request.user.is_authenticated:
-        return redirect(admin_login)
-
-    # Check superuser
-    if not request.user.is_superuser:
-        return HttpResponseForbidden("Not allowed")
-
     providers = ServiceProviderProfileDb.objects.select_related('user')\
         .all().order_by('-created_at')
 
@@ -144,16 +154,8 @@ def display_service_providers_for_approval_page(request):
     })
 
 
+@admin_required
 def approve_provider(request, provider_id):
-
-    # Check login
-    if not request.user.is_authenticated:
-        return redirect(admin_login)
-
-    # Check superuser
-    if not request.user.is_superuser:
-        return HttpResponseForbidden("Not allowed")
-
     provider = get_object_or_404(ServiceProviderProfileDb, id=provider_id)
 
     provider.approval_status = 'APPROVED'
@@ -163,19 +165,11 @@ def approve_provider(request, provider_id):
 
     messages.success(request, "Service Provider Approved Successfully!")
 
-    return redirect(display_service_providers_page)
+    return redirect("display_service_providers_for_approval_page")
 
 
+@admin_required
 def reject_provider(request, provider_id):
-
-    # Check login
-    if not request.user.is_authenticated:
-        return redirect(admin_login)
-
-    # Check superuser
-    if not request.user.is_superuser:
-        return HttpResponseForbidden("Not allowed")
-
     provider = get_object_or_404(ServiceProviderProfileDb, id=provider_id)
 
     provider.approval_status = 'REJECTED'
@@ -185,12 +179,13 @@ def reject_provider(request, provider_id):
 
     messages.warning(request, "Service Provider Rejected!")
 
-    return redirect(display_service_providers_page)
+    return redirect("display_service_providers_for_approval_page")
 
 # Service Provider Approve/Reject code End
 
 
 # user contact start
+@admin_required
 def admin_contact_messages(request):
 
     customer_messages = CustomerContactDb.objects.all().order_by("-created_at")
@@ -203,14 +198,17 @@ def admin_contact_messages(request):
 
     return render(request, "admin_contact_messages.html", context)
 
+@admin_required
 def delete_customer_message(request, message_id):
     CustomerContactDb.objects.filter(id=message_id).delete()
     return redirect("admin_contact_messages")
 
+@admin_required
 def delete_service_provider_message(request, message_id):
     ServiceProviderContactDb.objects.filter(id=message_id).delete()
     return redirect("admin_contact_messages")
 
+@admin_required
 def customers_details(request):
 
     customers = UserDb.objects.filter(
@@ -223,6 +221,7 @@ def customers_details(request):
 
     return render(request, "customers-details.html",context )
 
+@admin_required
 def service_providers_details(request):
 
     providers = UserDb.objects.filter(
@@ -235,6 +234,7 @@ def service_providers_details(request):
 
     return render(request, "service-providers-details.html", context)
 
+@admin_required
 def delete_user(request, user_id):
     user = get_object_or_404(UserDb, id=user_id)
     user.delete()
