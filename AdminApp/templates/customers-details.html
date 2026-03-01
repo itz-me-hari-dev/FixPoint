@@ -37,10 +37,10 @@
                         <td>{{ user.id }}</td>
 
                         <!-- Username -->
-                        <td>{{ user.username|default:"-" }}</td>
+                        <td>{{ user.user.username|default:"-" }}</td>
 
                         <!-- Email -->
-                        <td>{{ user.email|default:"-" }}</td>
+                        <td>{{ user.user.email|default:"-" }}</td>
 
                         <!-- Full Name -->
                         <td>

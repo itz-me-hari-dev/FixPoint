@@ -126,7 +126,7 @@ def delete_service_category(request,category_id):
 
 # Service Provider Approve/Reject code start
 
-def display_service_providers_page(request):
+def display_service_providers_for_approval_page(request):
 
     # Check login
     if not request.user.is_authenticated:

@@ -37,8 +37,8 @@
                     {% for user in providers %}
                     <tr>
                         <td>{{ user.id }}</td>
-                        <td>{{ user.username|default:"-" }}</td>
-                        <td>{{ user.email|default:"-" }}</td>
+                        <td>{{ user.user.username|default:"-" }}</td>
+                        <td>{{ user.user.email|default:"-" }}</td>
 
                         <!-- Full Name -->
                         <td>

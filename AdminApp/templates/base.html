@@ -282,7 +282,7 @@
                         <a class="nav-link" data-bs-toggle="collapse" href="#provider-dropdown" aria-expanded="false"
                             aria-controls="provider-dropdown">
 
-                            <span class="menu-title">Service Providers</span>
+                            <span class="menu-title">Service Providers Approval Request</span>
                             <i class="menu-arrow"></i>
                             <i class="mdi mdi-account-group menu-icon"></i>
 
@@ -292,8 +292,12 @@
                             <ul class="nav flex-column sub-menu">
 
                                 <li class="nav-item">
-                                    <a class="nav-link" href="{% url 'display_service_providers_page' %}">
-                                        Display Service Providers
+                                    <a class="nav-link" href="{% url 'display_service_providers_for_approval_page' %}">
+                                        <span>
+                                            Display Service Providers
+                                            <br>
+                                            Approval Requests
+                                        </span>
                                     </a>
                                 </li>
 
