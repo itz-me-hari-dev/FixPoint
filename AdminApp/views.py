@@ -139,7 +139,7 @@ def display_service_providers_for_approval_page(request):
     providers = ServiceProviderProfileDb.objects.select_related('user')\
         .all().order_by('-created_at')
 
-    return render(request, 'display_service_providers.html', {
+    return render(request, 'display_service_providers._approval_request.html', {
         'providers': providers
     })
 
