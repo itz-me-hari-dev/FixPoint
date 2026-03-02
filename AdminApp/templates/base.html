@@ -181,7 +181,7 @@
                             <h6 class="p-3 mb-0 text-center">See all notifications</h6>
                         </div>
                     </li> -->
-                    
+
                     {% if request.user.is_authenticated and request.user.is_superuser %}
 
                     <li class="nav-item nav-profile dropdown">
@@ -440,13 +440,14 @@
         </div>
 
         <!-- footer-start -->
-        <footer class="footer">
-            <div class="d-sm-flex justify-content-center justify-content-sm-between">
-                <span class="text-muted text-center text-sm-left d-block d-sm-inline-block">Copyright © 2023 <a
-                        href="https://www.bootstrapdash.com/" target="_blank">BootstrapDash</a>. All rights reserved.
-                    Distributed by <a href="http://themewagon.com" target="_blank">ThemeWagon</a></span>
-                <span class="float-none float-sm-right d-block mt-1 mt-sm-0 text-center">Hand-crafted & made with <i
-                        class="mdi mdi-heart text-danger"></i></span>
+        <footer class="footer bg-white border-top py-3">
+            <div class="container-fluid d-flex justify-content-between">
+                <span class="text-muted">
+                    © {{ now|date:"Y" }} FixPoint Admin | All Rights Reserved
+                </span>
+                <span class="text-muted">
+                    Version 1.0
+                </span>
             </div>
         </footer>
         <!-- footer-end -->
