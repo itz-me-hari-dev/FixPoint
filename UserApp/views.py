@@ -13,13 +13,7 @@ from django.conf import settings
 from django.contrib.auth.models import User
 from django.contrib.auth import login , authenticate , logout
 from django.contrib.auth.decorators import login_required
-from UserApp.notifications import (
-    notify_booking_created,
-    notify_booking_status_updated,
-    notify_contact_message,
-    notify_job_completed,
-    notify_payment_success,
-)
+from UserApp.notifications import *
 
 
 # Create your views here.
