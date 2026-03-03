@@ -433,6 +433,24 @@
 
             <!-- main-panel-start -->
             <div class="main-panel">
+                {% if messages %}
+                <div class="content-wrapper pb-0">
+                    {% for message in messages %}
+                    <div class="alert
+                        {% if message.tags == 'error' %}alert-danger
+                        {% elif message.tags == 'success' %}alert-success
+                        {% elif message.tags == 'warning' %}alert-warning
+                        {% else %}alert-info
+                        {% endif %}
+                        alert-dismissible fade show" role="alert">
+                        {{ message }}
+                        <button type="button" class="close" data-dismiss="alert" aria-label="Close">
+                            <span aria-hidden="true">&times;</span>
+                        </button>
+                    </div>
+                    {% endfor %}
+                </div>
+                {% endif %}
                 {% block content %}
                 {% endblock %}
             </div>
