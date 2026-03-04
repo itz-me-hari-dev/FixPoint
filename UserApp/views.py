@@ -19,6 +19,7 @@ from UserApp.notifications import *
 # Create your views here.
 
 def home(request):
+    
     categories = ServiceCategoryDb.objects.all()
     return render(request,"index.html",{"categories":categories})
 
