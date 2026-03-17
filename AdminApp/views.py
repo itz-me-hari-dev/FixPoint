@@ -1,5 +1,4 @@
 from django.shortcuts import render , redirect ,get_object_or_404
-from django.http import HttpResponseForbidden
 from django.utils.datastructures import MultiValueDictKeyError
 from django.core.files.storage import FileSystemStorage
 from AdminApp.models import *
@@ -18,7 +17,8 @@ def admin_required(view_func):
         if not request.user.is_authenticated:
             return redirect("admin_login")
         if not request.user.is_superuser:
-            return HttpResponseForbidden("Not allowed")
+            messages.error(request, "Please log in with an admin account.")
+            return redirect("admin_login")
         return view_func(request, *args, **kwargs)
     return _wrapped_view
 
@@ -48,6 +48,9 @@ def dashboard(request):
     return render(request, "dashboard.html", context)
 
 def admin_login(request):
+
+    if request.user.is_authenticated and request.user.is_superuser:
+        return redirect('dashboard')
 
     if request.method == "POST":
 
