@@ -250,6 +250,7 @@ def service_provider_dashboard(request):
 def manage_service_provider_profile(request):
 
     user_profile = get_object_or_404(UserDb, user=request.user)
+    service_categories = ServiceCategoryDb.objects.filter(is_active=True)
 
     if request.user.profile.user_role != "SERVICE_PROVIDER":
         messages.error(request, "Unauthorized access.")
@@ -308,7 +309,8 @@ def manage_service_provider_profile(request):
         return redirect("service_provider_dashboard")
 
     return render(request, "service-provider-dashboard.html", {
-        "profile": profile
+        "profile": profile,
+        "service_categories": service_categories,
     })
 
 @login_required(login_url="user_authentication")
