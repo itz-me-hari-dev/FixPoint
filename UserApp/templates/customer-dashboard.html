@@ -603,7 +603,8 @@
         customerMap = L.map('customer_map').setView([defaultLat, defaultLon], defaultZoom);
 
         L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
-            attribution: '© OpenStreetMap contributors'
+            attribution: '© OpenStreetMap contributors',
+            referrerPolicy: 'strict-origin-when-cross-origin'
         }).addTo(customerMap);
 
         customerMarker = L.marker([defaultLat, defaultLon]).addTo(customerMap);
@@ -618,7 +619,9 @@
 
             customerMarker.setLatLng([lat, lon]);
 
-            fetch(`https://nominatim.openstreetmap.org/reverse?format=json&lat=${lat}&lon=${lon}`)
+            fetch(`https://nominatim.openstreetmap.org/reverse?format=json&lat=${lat}&lon=${lon}`, {
+                referrerPolicy: 'strict-origin-when-cross-origin'
+            })
                 .then(res => res.json())
                 .then(data => {
                     const addr = data.address || {};

@@ -147,7 +147,8 @@
     var map = L.map('map').setView([latitude, longitude], 14);
 
     L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
-        attribution: '&copy; OpenStreetMap contributors'
+        attribution: '&copy; OpenStreetMap contributors',
+        referrerPolicy: 'strict-origin-when-cross-origin'
     }).addTo(map);
 
     L.marker([latitude, longitude])
