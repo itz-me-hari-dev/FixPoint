@@ -28,7 +28,6 @@ class CustomerContactDb(models.Model):
     def __str__(self):
         return f"{self.full_name} - {self.email}"
 
-
 class ServiceProviderContactDb(models.Model):
 
     user = models.ForeignKey(
