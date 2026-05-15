@@ -29,7 +29,6 @@ class CustomerContactDb(models.Model):
         return f"{self.full_name} - {self.email}"
 
 
-
 class ServiceProviderContactDb(models.Model):
 
     user = models.ForeignKey(
