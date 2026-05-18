@@ -85,6 +85,7 @@ class ServiceProviderProfileDb(models.Model):
 
 
 
+
 class CustomerProfileDb(models.Model):
 
     user = models.OneToOneField(UserDb, on_delete=models.CASCADE)
