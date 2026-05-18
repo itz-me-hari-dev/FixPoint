@@ -82,10 +82,6 @@ class ServiceProviderProfileDb(models.Model):
     def __str__(self):
         return f"{self.full_name} (ServiceProvider)"
 
-
-
-
-
 class CustomerProfileDb(models.Model):
 
     user = models.OneToOneField(UserDb, on_delete=models.CASCADE)
