@@ -113,6 +113,7 @@ class CustomerProfileDb(models.Model):
 
 
 
+
 class ServiceBookingDb(models.Model):
 
     STATUS_CHOICES = (
