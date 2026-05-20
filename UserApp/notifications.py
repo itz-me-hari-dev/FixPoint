@@ -16,9 +16,6 @@ def _send_notification(subject, message, recipients):
     )
 
 
-
-
-
 def notify_contact_message(form_type, full_name, email, message):
     if not email:
         return
